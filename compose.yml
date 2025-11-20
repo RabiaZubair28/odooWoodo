@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:18
+    restart: always
+    env_file:
+      - .env
+    environment:
+          - POSTGRES_DB=${POSTGRES_DB}
+          - POSTGRES_USER=${POSTGRES_USER}
+          - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/
+
+  odoo:
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: >
+      /app/odoo-src/odoo-bin 
+      --db_host=${DB_HOST} 
+      --db_user=${POSTGRES_USER} 
+      --db_password=${POSTGRES_PASSWORD}
+      --workers=${ODOO_WORKERS}
+      --limit-memory-hard=${ODOO_LIMIT_MEMORY_HARD}
+      --limit-memory-soft=${ODOO_LIMIT_MEMORY_SOFT}
+      --log-level=${LOG_LEVEL}
+      --addons-path=/app/modules/
+      --data-dir=/app/data/
+      --dev=reload
+    volumes:
+      - ./volumes/odoo-data:/app/data
+      - ./modules:/app/modules
+    environment:
+      - HOST=${DB_HOST}
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${POSTGRES_PASSWORD}
