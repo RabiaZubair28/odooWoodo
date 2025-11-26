@@ -6,7 +6,7 @@
 
 ## Overview
 
-This project is an Odoo 19.0 implementation designed for HR management. It utilizes a containerized architecture with Docker and Docker Compose, employing `uv` for high-performance Python dependency management.
+This project is an Odoo 18.0 implementation designed for HR management. It utilizes a containerized architecture with Docker and Docker Compose, employing `uv` for high-performance Python dependency management.
 
 ## Prerequisites
 
