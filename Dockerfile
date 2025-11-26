@@ -25,7 +25,7 @@ RUN uv sync --frozen --no-install-project
 ENV PATH="/app/.venv/bin:$PATH"
 
 # 4. Download Odoo Source
-RUN git clone --depth 1 --branch 19.0 https://github.com/odoo/odoo.git /app/odoo-src \
+RUN git clone --depth 1 --branch 18.0 https://github.com/odoo/odoo.git /app/odoo-src \
     && uv pip install -r /app/odoo-src/requirements.txt \
     && uv pip install -e /app/odoo-src
 # ==========================================
@@ -41,6 +41,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # 2. Setup User
 RUN useradd -m -d /var/lib/odoo -s /bin/bash odoo
+COPY --chown=odoo:odoo ./entrypoint.sh /app/entrypoint.sh
 
 USER odoo
 
@@ -66,6 +67,7 @@ COPY --from=builder /app/odoo-src /app/odoo-src
 # 3. Setup User & Config
 RUN useradd -m -d /var/lib/odoo -s /bin/bash odoo
 COPY --chown=odoo:odoo ./modules /app/modules
-COPY --chown=odoo:odoo ./config/odoo.prod.conf /etc/odoo/odoo.conf
+COPY --chown=odoo:odoo ./config /app/config
+COPY --chown=odoo:odoo ./entrypoint.sh /app/entrypoint.sh
 
 ENV PATH="/app/.venv/bin:$PATH"\

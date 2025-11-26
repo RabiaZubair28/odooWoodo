@@ -10,15 +10,7 @@ services:
     env_file:
       - .env.prod
     command: >
-      /app/odoo-src/odoo-bin 
-      --db_host=${DB_HOST} 
-      --db_user=${POSTGRES_USER} 
-      --db_password=${POSTGRES_PASSWORD}
-      --workers=${ODOO_WORKERS}
-      --limit-memory-hard=${ODOO_LIMIT_MEMORY_HARD}
-      --limit-memory-soft=${ODOO_LIMIT_MEMORY_SOFT}
-      --log-level=${LOG_LEVEL}
-      --proxy-mode=True
+      /app/entrypoint.sh --proxy-mode=True
     ports:
       - "8069:8069"
     restart: always
