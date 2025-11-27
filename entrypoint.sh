@@ -37,7 +37,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Initializing Odoo Database..."
-$ODOO_BIN -c $CONFIG_FILE -d $POSTGRES_DB -i base --no-http --stop-after-init --db_user=$POSTGRES_USER --db_password=$POSTGRES_PASSWORD
+$ODOO_BIN -c $CONFIG_FILE -d $POSTGRES_DB -i base -i hrmis_registry --no-http --stop-after-init --db_user=$POSTGRES_USER --db_password=$POSTGRES_PASSWORD
 
 if [ $? -ne 0 ]; then
     echo "Error: Database initialization failed." >&2
