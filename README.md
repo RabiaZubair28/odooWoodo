@@ -25,29 +25,39 @@ The project uses a multi-stage `Dockerfile` to separate build dependencies from 
 
 ## Usage
 
-A wrapper script `run.sh` is provided to manage the environment context and Docker Compose overrides.
+A CLI tool `./hrmis` is provided to manage the environment context and Docker Compose lifecycle.
 
 ### Development Mode
 
 To start the system in development mode (hot-reloading enabled, local modules mounted):
 
 ```bash
-./run.sh
+./hrmis start
 ```
 
   * **Web Interface:** http://localhost:8069
   * **Debugger:** Port 5678 is exposed for remote debugging.
-  * **Logs:** `docker compose logs -f odoo`
+  * **Logs:** `./hrmis logs -f` or `./hrmis logs -f odoo`
 
 ### Production Mode
 
 To start the system in production mode (immutable image, optimized runtime, no code mounting):
 
 ```bash
-./run.sh --prod
+./hrmis start --prod
 ```
 
   * **Note:** This mode uses `.env.prod` and `compose.prod.yml`.
+
+### Other Commands
+
+```bash
+./hrmis stop              # Stop containers
+./hrmis stop --clean      # Stop and remove volumes/config
+./hrmis status            # Show container status
+./hrmis logs [service]    # View logs (add -f to follow)
+./hrmis --help            # Show all available commands
+```
 
 ## Configuration
 
@@ -77,5 +87,6 @@ Key libraries managed via `pyproject.toml` and `uv`:
   * `numpy`, `pandas` (Data processing)
   * `openpyxl`, `xlsxwriter`, `xlrd` (Excel I/O)
   * `odoo-stubs` (Type support)
+  * `click` (CLI tool framework, dev dependency)
 
-To update dependencies, modify `pyproject.toml` and restart the container via `./run.sh` to trigger a rebuild.
+To update dependencies, modify `pyproject.toml` and restart the container via `./hrmis start` to trigger a rebuild.
