@@ -23,6 +23,6 @@ services:
       - ./modules:/app/modules
       - ./config:/app/config
     environment:
-      - HOST=${DB_HOST}
+      - HOST=${POSTGRES_HOST}
       - USER=${POSTGRES_USER}
       - PASSWORD=${POSTGRES_PASSWORD}
