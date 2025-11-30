@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Sindh HRMIS Management CLI
 Consolidated tool for managing the HRMIS Docker environment
