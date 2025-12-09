@@ -12,7 +12,11 @@ class HREmployee(models.Model):
 
     hrmis_cadre = fields.Char(related="hrmis_profile_id.cadre", readonly=True)
     hrmis_designation = fields.Char(related="hrmis_profile_id.designation", readonly=True)
-    hrmis_bps = fields.Char(related="hrmis_profile_id.bps", readonly=True)
+    hrmis_bps = fields.Selection(related="hrmis_profile_id.bps", readonly=True)
+
+    hrmis_contact_info = fields.Char(related="hrmis_profile_id.contact_info", readonly=True)
+    hrmis_description    = fields.Text(related="hrmis_profile_id.description", readonly=True)
+    hrmis_active = fields.Boolean(related="hrmis_profile_id.active", readonly=True)
 
     hrmis_district_id = fields.Many2one(related="hrmis_profile_id.district_id", readonly=True)
     hrmis_facility_id = fields.Many2one(related="hrmis_profile_id.facility_id", readonly=True)

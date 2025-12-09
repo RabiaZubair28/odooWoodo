@@ -13,6 +13,9 @@
                             <field name="father_name" />
                             <field name="date_of_birth" />
                             <field name="gender" />
+                            <field name="contact_info" />
+                            <field name="description" />
+                            <field name="active" />
                         </group>
 
                         <group string="Job Details" col="2">
@@ -39,6 +42,9 @@
                 <field name="cnic"/>
                 <field name="district_id"/>
                 <field name="facility_id"/>
+                <field name="contact_info"/>
+                <field name="description"/>
+                <field name="active"/>
             </list>
         </field>
     </record>
