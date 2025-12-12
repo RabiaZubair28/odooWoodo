@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
+from datetime import date
 
 class HrmisUserProfile(models.Model):
     _name = "hrmis.user.profile"
@@ -56,3 +58,14 @@ class HrmisUserProfile(models.Model):
             return {'domain': {'facility_id': [('district_id', '=', self.district_id.id)]}}
         else:
             return {'domain': {'facility_id': []}}
+        
+
+    @api.constrains('joining_date', 'date_of_birth')
+    def _check_date_range(self):
+        today = date.today()
+        for rec in self:
+            if rec.joining_date and rec.joining_date > today:
+                raise ValidationError("Joining Date cannot be in the future.")
+            if rec.date_of_birth and rec.date_of_birth > today:
+                raise ValidationError("Date of Birth cannot be in the future.")
+        
