@@ -10,8 +10,6 @@
                     <separator string="Staff Personal Information" class="mb-3"/>
 
                     <group col="4">
-
-                        <!-- Personal Details -->
                         <group string="Personal Details" col="2">
                             <field name="hrmis_cnic" readonly="1"/>
                             <field name="hrmis_father_name" readonly="1"/>
@@ -22,19 +20,43 @@
                             <field name="hrmis_active" readonly="1"/>
                         </group>
 
-                        <!-- Job Information -->
                         <group string="Job Information" col="2">
                             <field name="hrmis_cadre" readonly="1"/>
                             <field name="hrmis_designation" readonly="1"/>
                             <field name="hrmis_bps" readonly="1"/>
+                            <field name="hrmis_joining_date" readonly="1" />
                             <field name="hrmis_district_id" readonly="1"/>
                             <field name="hrmis_facility_id" readonly="1"/>
                         </group>
 
                     </group>
                 </page>
+                
+            </xpath>
+                
+            <xpath expr="//page[@name='hrmis_personal_info']" position="after">
+                <page name="hrmis_service_history" string="Service History">
+                    <separator string="Employee Service History" class="mb-3"/>
+
+                    <field name="hrmis_service_history_ids" mode="list,form">
+                        <list string="Service History">
+                                <field name="from_date"/>
+                                <field name="to_date"/>
+                                <field name="commission_date"/>
+                                <field name="district_id"/>
+                                <field name="facility_id"/>
+                        </list>
+                    </field>
+                </page>
             </xpath>
 
+            <xpath expr="//page[@name='skills_resume']" position="replace">
+            </xpath>
+            <xpath expr="//page[@name='public']" position="attributes">
+                 <attribute name="invisible">1</attribute>
+            </xpath> 
+            <xpath expr="//page[@name='personal_information']" position="replace">
+            </xpath>
         </field>
     </record>
 </odoo>

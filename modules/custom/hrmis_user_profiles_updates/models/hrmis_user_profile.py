@@ -1,5 +1,4 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
 
 class HrmisUserProfile(models.Model):
     _name = "hrmis.user.profile"
@@ -13,11 +12,12 @@ class HrmisUserProfile(models.Model):
     father_name = fields.Char(string="Father's Name")
     cnic = fields.Char(string="CNIC", required=True)
     date_of_birth = fields.Date(string="Date of Birth")
+    joining_date = fields.Date(string="Joining Date", required=True)
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
         ('other', 'Other')
-    ], string="Gender")
+    ], string="Gender", required=True)
     cadre = fields.Char(string="Cadre")
     designation = fields.Char(string="Designation")
     bps = fields.Selection([
@@ -26,6 +26,7 @@ class HrmisUserProfile(models.Model):
         ('19', '19'),
         ('20', '20')
     ],string="BPS")
+    
     district_id = fields.Many2one('x_district.master', string="Current Posting District")
     facility_id = fields.Many2one(
     'x_facility.type', string="Current Posting Facility",
@@ -39,14 +40,14 @@ class HrmisUserProfile(models.Model):
         ('cnic_unique', 'unique(cnic)', 'CNIC must be unique!')
     ]
 
-    @api.model
-    def create(self, vals):
-        profile = super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        profiles = super().create(vals_list)
+        for profile in profiles:
+            if profile.employee_id:
+                profile.employee_id.hrmis_profile_id = profile.id
+        return profiles
 
-        if profile.employee_id:
-            profile.employee_id.hrmis_profile_id = profile.id
-
-        return profile
 
     @api.onchange('district_id')
     def _onchange_district(self):
