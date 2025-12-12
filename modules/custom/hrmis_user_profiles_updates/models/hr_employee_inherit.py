@@ -9,6 +9,11 @@ class HREmployee(models.Model):
         'employee_id',           
         string="Service History"
     )
+    hrmis_training_ids = fields.One2many(
+        "hrmis.training.record",
+        "employee_id",
+        string="Qualifications & Trainings"
+    )
 
     hrmis_cnic = fields.Char(related="hrmis_profile_id.cnic", readonly=True)
     hrmis_father_name = fields.Char(related="hrmis_profile_id.father_name", readonly=True)

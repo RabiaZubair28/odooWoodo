@@ -4,3 +4,6 @@ access_hrmis_user_profile_admin,hrmis.user.profile admin,model_hrmis_user_profil
 
 access_service_history_hr_user,access_service_history_hr_user,model_hrmis_service_history,hr.group_hr_user,1,1,1,1
 access_service_history_admin,access_service_history_admin,model_hrmis_service_history,base.group_system,1,1,1,1
+
+access_hrmis_training_record_user,access_hrmis_training_record_user,model_hrmis_training_record,hr.group_hr_user,1,1,1,1
+access_hrmis_training_record_employee,access_hrmis_training_record_employee,model_hrmis_training_record,base.group_user,1,1,1,0
