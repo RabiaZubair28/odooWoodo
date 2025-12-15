@@ -1,5 +1,12 @@
 from odoo import models, fields, api
 
+
+# class HrProfile(models.Model):
+#     _name = 'hr.profile'
+#     cadre = fields.char()
+#     commission_date = fields.Date()
+    
+    
 class ApprovalAction(models.Model):
     _name = "approval.action"
     _description = "Approval Action"

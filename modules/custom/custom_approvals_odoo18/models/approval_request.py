@@ -1,5 +1,6 @@
-# from odoo import models, fields, api
-# from odoo.exceptions import UserError
+from odoo import models, fields, api
+from odoo.exceptions import UserError, ValidationError
+from datetime import datetime
 
 # class ApprovalRequest(models.Model):
 #     _name = "approval.request"
@@ -58,8 +59,8 @@
 #             vals['name'] = seq
 #         return super().create(vals)
 
-from odoo import models, fields, api
-from datetime import datetime
+
+
 
 class ApprovalRequest(models.Model):
     _name = "approval.request"
@@ -100,7 +101,20 @@ class ApprovalRequest(models.Model):
 
     approved_by = fields.Many2one('res.users', string="Approved By", tracking=True)
     approved_date = fields.Datetime(string="Approval Date")
-
+    
+    payload = fields.Json(string="Payload", copy=False)
+    assigned_to = fields.Many2one('res.users', string="Assigned To")
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        recs = super().create(vals_list)
+        for rec in recs:
+            # if not assigned and payload has cadre, find mapping
+            if not rec.assigned_to and rec.payload and rec.payload.get('cadre'):
+                mapping = self.env['hr.cadre.mapping'].search([('cadre_id','=',int(rec.payload.get('cadre')))], limit=1)
+                if mapping and mapping.so_ids:
+                    rec.assigned_to = mapping.so_ids[0].id
+        return recs
     def set_pending(self):
         for rec in self:
             rec.state = 'pending'
@@ -111,17 +125,49 @@ class ApprovalRequest(models.Model):
                 'note': 'Submitted for approval',
             })
 
+    # def action_approve(self):
+    #     for rec in self:
+    #         # Load user profile from your other module
+    #         profile = self.env['hr.profile'].search([('user_id', '=', self.env.user.id)], limit=1)
+
+    #         # Apply condition from that module
+    #         if profile and profile.cadre != 'SO':
+    #             raise ValidationError("Only SO can approve this request!")
+
+    #         rec.state = 'approved'
+    #         rec.approved_by = self.env.user.id
+    #         rec.approved_date = fields.Datetime.now()
+
+    #         rec.action_ids.create({
+    #             'request_id': rec.id,
+    #             'action': 'approve',
+    #             'user_id': self.env.user.id,
+    #             'note': 'Approved',
+    #         })
     def action_approve(self):
         for rec in self:
             rec.state = 'approved'
             rec.approved_by = self.env.user.id
             rec.approved_date = fields.Datetime.now()
-            rec.action_ids.create({
+            # audit
+            self.env['approval.action'].create({
                 'request_id': rec.id,
                 'action': 'approve',
                 'user_id': self.env.user.id,
-                'note': 'Approved',
+                'note': 'Approved by SO'
             })
+            # apply snapshot to hr.profile (if we saved profile_id on request)
+            # find profile by requester
+            profile = self.env['hr.profile'].search([('user_id','=',rec.requester_id.id)], limit=1)
+            if profile and rec.payload:
+                profile_vals = {}
+                # loop keys: be intentional
+                for k,v in rec.payload.items():
+                    if k in profile._fields:
+                        profile_vals[k] = v
+                profile.sudo().write(profile_vals)
+                profile.sudo().write({'state':'approved'})
+                rec.requester_id.sudo().write({'onboarding_state':'approved'})
 
     def action_reject(self):
         for rec in self:

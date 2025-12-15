@@ -1,2 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_custom_approval_data,custom approval data model access,model_approval_request,base.group_user,1,1,1,1
+access_approval_request,Approval Request Access,model_approval_request,base.group_user,1,1,1,1
+access_approval_type,Approval Type Access,model_approval_type,base.group_user,1,1,1,1
+access_approval_type,Cadre Access,model_hr_cadre,base.group_user,1,1,1,1
+access_approval_action,Approval Action Access,model_approval_action,base.group_user,1,1,1,1
+access_hr_profile_user,hr profile access,model_hr_profile,base.group_user,1,1,1,0
+access_hr_profile_admin,hr profile admin,model_hr_profile,base.group_system,1,1,1,1

@@ -9,7 +9,6 @@ class ApprovalType(models.Model):
     description = fields.Text(string="Description")
     active = fields.Boolean(default=True)
 
-    # Example: profile_change, leave_request, training_upload etc.
     category = fields.Selection([
         ('profile', 'Profile Change'),
         ('leave', 'Leave Request'),
@@ -18,3 +17,10 @@ class ApprovalType(models.Model):
     ], string="Category", default='other')
 
     sequence = fields.Integer(string="Sequence", default=10)
+
+    # Add approvers
+    approver_ids = fields.Many2many(
+        'res.users', 
+        string="Approvers",
+        help="Users who are allowed to approve this type of request"
+    )

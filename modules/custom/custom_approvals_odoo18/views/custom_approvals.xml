@@ -58,46 +58,60 @@
                     </notebook>
 
                 </sheet>
+            <footer>
+    <button name="redirect_dummy"
+        type="button"
+        class="btn-primary redirect_approval_btn">
+    Go to Webpage
+</button>
+
+
+</footer>
+
 
             </form>
         </field>
     </record>
 
-    <!-- Approval type Views -->
-     <record id="view_approval_type_tree" model="ir.ui.view">
-        <field name="name">approval.type.tree</field>
-        <field name="model">approval.type</field>
-        <field name="arch" type="xml">
-            <list string="Approval Types">
-                <field name="name"/>
-                <field name="code"/>
-                <field name="category"/>
-                <field name="active"/>
-            </list>
-        </field>
-    </record>
 
-    <!-- Form View -->
-    <record id="view_approval_type_form" model="ir.ui.view">
-        <field name="name">approval.type.form</field>
-        <field name="model">approval.type</field>
-        <field name="arch" type="xml">
-            <form string="Approval Type">
-                <sheet>
-                    <group>
-                        <field name="name"/>
-                        <field name="code"/>
-                        <field name="category"/>
-                        <field name="sequence"/>
-                        <field name="active"/>
-                    </group>
-                    <group>
-                        <field name="description"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+<!-- Approval type Views -->
+<record id="view_approval_type_tree" model="ir.ui.view">
+    <field name="name">approval.type.tree</field>
+    <field name="model">approval.type</field>
+    <field name="arch" type="xml">
+        <list string="Approval Types">
+            <field name="name"/>
+            <field name="code"/>
+            <field name="category"/>
+            <field name="sequence"/>
+            <field name="active"/>
+        </list>
+    </field>
+</record>
+
+<!-- Form View -->
+<record id="view_approval_type_form" model="ir.ui.view">
+    <field name="name">approval.type.form</field>
+    <field name="model">approval.type</field>
+    <field name="arch" type="xml">
+        <form string="Approval Type">
+            <sheet>
+                <group>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="category"/>
+                    <field name="sequence"/>
+                    <field name="active"/>
+                    <field name="approver_ids" widget="many2many_tags"/>
+                </group>
+                <group>
+                    <field name="description"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
     <!-- Approval Action Views -->
      <record id="view_approval_action_tree" model="ir.ui.view">
         <field name="name">approval.action.tree</field>
@@ -183,5 +197,12 @@
               parent="menu_approvals_root"
               action="action_approval_action"
               sequence="40"/>
+
+
+
+
+
+
+
 
 </odoo>
