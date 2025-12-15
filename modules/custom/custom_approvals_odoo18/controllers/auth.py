@@ -1,50 +1,60 @@
-# from odoo import http, _
-# from odoo.http import request
-# from odoo.addons.web.controllers.main import Home
-
-# class AuthHome(Home):
-
-#     @http.route('/web/login', type='http', auth='public', website=True)
-#     def web_login(self, redirect=None, **kw):
-#         response = super(AuthHome, self).web_login(redirect=redirect, **kw)
-#         uid = request.session.uid
-#         if uid:
-#             user = request.env['res.users'].sudo().browse(uid)
-#             # Skip admins
-#             if user.is_temp_password and not user.has_group('base.group_system'):
-#                 return request.redirect('/force_password_reset')
-#         return response
-
-#     @http.route('/force_password_reset', type='http', auth='user', website=True)
-#     def force_password_page(self, **kw):
-#         return request.render('custom_approvals_odoo18.force_password_template', {})
-
-#     @http.route('/force_password_reset_submit', type='http', auth='user', website=True, methods=['POST'])
-#     def force_password_submit(self, **kw):
-#         user = request.env.user.sudo()
-#         current_password = kw.get('current_password')
-#         new_password = kw.get('new_password')
-#         confirm_password = kw.get('confirm_password')
-
-#         # Validate current password
-#         if not user.check_password(current_password):
-#             return request.render('custom_approvals_odoo18.force_password_template', {'error': _('Current password incorrect')})
-#         # Validate new passwords match
-#         if new_password != confirm_password:
-#             return request.render('custom_approvals_odoo18.force_password_template', {'error': _('Passwords do not match')})
-
-#         # Set new password and mark temp flag false
-#         user.write({'password': new_password, 'is_temp_password': False})
-#         return request.redirect('/web')  # Or redirect to profile page
-
-
 from odoo import http
 from odoo.http import request
+from odoo.exceptions import AccessDenied
 
-class MyCustomController(http.Controller):
+class ForcePasswordController(http.Controller):
 
-    @http.route('/approvals/hello', type='http', auth='public', website=True)
-    def public_hello(self, **kw):
-        return request.render('custom_approvals_odoo18.hello_template', {
-    'message': "Hello, world!"
-})
+    @http.route('/force_password_reset', type='http', auth='user', website=True)
+    def force_password_reset(self, **kw):
+        return request.render('custom_approvals_odoo18.reset_password')
+
+    @http.route(
+        '/force_password_reset/submit',
+        type='http',
+        auth='user',
+        methods=['POST'],
+        website=True,
+        csrf=True
+    )
+    def force_password_reset_submit(self, **post):
+        user = request.env.user
+
+        current_password = post.get('current_password')
+        new_password = post.get('new_password')
+        confirm_password = post.get('confirm_password')
+
+        # Guardrails
+        if not all([current_password, new_password, confirm_password]):
+            return request.render(
+                'custom_approvals_odoo18.reset_password',
+                {'error': 'All fields are required.'}
+            )
+
+        if new_password != confirm_password:
+            return request.render(
+                'custom_approvals_odoo18.reset_password',
+                {'error': 'New passwords do not match.'}
+            )
+
+        # ✅ Correct Odoo 18 password check
+        try:
+            user.sudo()._check_credentials(
+                {'type': 'password', 'password': current_password},
+                request.env
+            )
+        except Exception:
+            return request.render(
+                'custom_approvals_odoo18.reset_password',
+                {'error': 'Current password is incorrect.'}
+            )
+
+        # Update password + clear temp flag
+        user.sudo().write({
+            'password': new_password,
+            'is_temp_password': False,
+        })
+
+        # Update session UID so user stays logged in
+        request.session.uid = user.id
+
+        return request.redirect('/web')
