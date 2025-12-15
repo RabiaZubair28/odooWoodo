@@ -6,7 +6,7 @@ class HrmisUserProfile(models.Model):
     _name = "hrmis.user.profile"
     _description = "HRMIS User Profile"
     _rec_name = "employee_id"
-
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     employee_id = fields.Many2one(
         'hr.employee', string="Employee", required=True, ondelete="cascade"
     )
@@ -46,10 +46,27 @@ class HrmisUserProfile(models.Model):
     def create(self, vals_list):
         profiles = super().create(vals_list)
         for profile in profiles:
-            if profile.employee_id:
-                profile.employee_id.hrmis_profile_id = profile.id
+            if profile.employee_id.user_id:
+                # Send notification to the employee user
+                profile.message_post(
+                    body="Your user profile has been created.",
+                    partner_ids=[profile.employee_id.user_id.partner_id.id],
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_comment",
+                )
         return profiles
 
+    def write(self, vals):
+        res = super().write(vals)
+        for profile in self:
+            if profile.employee_id.user_id:
+                profile.message_post(
+                    body="Your user profile has been updated.",
+                    partner_ids=[profile.employee_id.user_id.partner_id.id],
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_comment",
+                )
+        return res
 
     @api.onchange('district_id')
     def _onchange_district(self):
@@ -68,4 +85,3 @@ class HrmisUserProfile(models.Model):
                 raise ValidationError("Joining Date cannot be in the future.")
             if rec.date_of_birth and rec.date_of_birth > today:
                 raise ValidationError("Date of Birth cannot be in the future.")
-        
