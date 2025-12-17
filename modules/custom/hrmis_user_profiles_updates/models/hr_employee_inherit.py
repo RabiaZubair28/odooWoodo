@@ -5,7 +5,6 @@ from datetime import date
 class HREmployee(models.Model):
     _inherit = 'hr.employee'
 
-    # hrmis_profile_id = fields.Many2one('hrmis.user.profile', string="Profile", readonly=True)
     hrmis_service_history_ids = fields.One2many(
         'hrmis.service.history', 
         'employee_id',           
@@ -107,23 +106,3 @@ class HREmployee(models.Model):
             if rec.date_of_birth and rec.date_of_birth > today:
                 raise ValidationError("Date of Birth cannot be in the future.")
             
-
-    # def action_open_hrmis_profile(self):
-    #     self.ensure_one()
-
-    #     profile = self.hrmis_profile_id
-
-    #     if not profile:
-    #         profile = self.env['hrmis.user.profile'].create({
-    #             'employee_id': self.id
-    #         })
-    #         self.hrmis_profile_id = profile.id
-
-    #     return {
-    #     'type': 'ir.actions.act_window',
-    #     'name': 'HRMIS Profile',
-    #     'res_model': 'hrmis.user.profile',
-    #     'view_mode': 'form',
-    #     'target': 'current',
-    #     'context': {'default_employee_id': self.id}  # prefill employee
-    # }
