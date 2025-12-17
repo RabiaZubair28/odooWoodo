@@ -5,6 +5,7 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
 
+        
             <xpath expr="//page[@name='public']" position="before">
                 <page name="hrmis_personal_info" string="Personal Info">
                     <separator string="Staff Personal Information" class="mb-3"/>
@@ -13,11 +14,13 @@
                         <group string="Personal Details" col="2">
                             <field name="hrmis_cnic" />
                             <field name="hrmis_father_name" />
-                            <field name="hrmis_date_of_birth" />
-                            <field name="hrmis_gender" />
+                            <field name="birthday" />
+                            <field name="gender" />
+                            <field name="address_id" />
+                            <field name="work_phone" />
                             <field name="hrmis_contact_info" />
                             <field name="hrmis_description" />
-                            <field name="hrmis_active" />
+                            <field name="active" />
                         </group>
 
                         <group string="Job Information" col="2">
@@ -25,8 +28,9 @@
                             <field name="hrmis_designation" />
                             <field name="hrmis_bps" />
                             <field name="hrmis_joining_date"  />
-                            <field name="hrmis_district_id" />
-                            <field name="hrmis_facility_id" />
+                            <field name="district_id" />
+                            <field name="hrmis_tehsil" />
+                            <field name="facility_id" />
                         </group>
 
                     </group>
@@ -67,6 +71,21 @@
                 </page>
             </xpath>
 
+            <!-- <xpath expr="//page[@name='hrmis_certifications_trainings']" position="after">
+                <page name="hrmis_personal_info" string="Personal Info">
+                <separator string="Staff Personal Information"/>
+
+                <group col="4">
+                    <group string="Personal Details">
+                        <field name="hrmis_cnic"/>
+                        <field name="hrmis_father_name"/>
+                        <field name="birthday"/>
+                        <field name="gender"/>
+                        <field name="hrmis_contact_info"/>
+                    </group>
+                </group>
+            </page>
+            </xpath> -->
             <xpath expr="//page[@name='skills_resume']" position="replace">
             </xpath>
             <xpath expr="//page[@name='public']" position="attributes">

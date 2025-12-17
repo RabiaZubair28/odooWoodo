@@ -46,6 +46,11 @@ class HrmisUserProfile(models.Model):
     def create(self, vals_list):
         profiles = super().create(vals_list)
         for profile in profiles:
+
+            # if not profile.hrmis_profile_id:
+            #     profile.hrmis_profile_id = self.env['hrmis.user.profile'].create({
+            #         'employee_id': profile.id
+            #     }).id
             if profile.employee_id.user_id:
                 # Send notification to the employee user
                 profile.message_post(
@@ -55,6 +60,7 @@ class HrmisUserProfile(models.Model):
                     subtype_xmlid="mail.mt_comment",
                 )
         return profiles
+
 
     def write(self, vals):
         res = super().write(vals)
