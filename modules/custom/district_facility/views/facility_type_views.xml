@@ -1,7 +1,7 @@
 <odoo>
     <record id="view_facility_type_list" model="ir.ui.view">
     <field name="name">facility.type.list</field>
-    <field name="model">x_facility.type</field>
+    <field name="model">facility.type</field>
     <field name="arch" type="xml">
         <list>
             <field name="name"/>
@@ -15,7 +15,7 @@
 
 <record id="view_facility_type_form" model="ir.ui.view">
     <field name="name">facility.type.form</field>
-    <field name="model">x_facility.type</field>
+    <field name="model">facility.type</field>
     <field name="arch" type="xml">
         <form>
             <sheet>
@@ -33,7 +33,7 @@
 </record>
 <record id="action_facility_types" model="ir.actions.act_window">
     <field name="name">Facility Types</field>
-    <field name="res_model">x_facility.type</field>
+    <field name="res_model">facility.type</field>
     <field name="view_mode">list,form</field>
     <field name="view_id" ref="view_facility_type_list"/>
 </record>

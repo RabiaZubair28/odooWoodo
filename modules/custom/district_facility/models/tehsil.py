@@ -1,7 +1,7 @@
 from odoo import models, fields
 
 class Tehsil(models.Model):
-    _name = "x_tehsil.master"
+    _name = "tehsil.master"
     _description = "Tehsil"
     _order = "name"
 
@@ -9,13 +9,8 @@ class Tehsil(models.Model):
 
     name = fields.Char(string="Tehsil Name", required=True)
     code = fields.Char(string="Tehsil Code")
-    district_id = fields.Many2one(
-        'x_district.master',
-        string="District",
-        required=True,
-        ondelete="cascade"
-    )
-
+    facility_id = fields.Many2one('facility.type', string="Facility", required=True)
+    district_id = fields.Many2one(related='facility_id.district_id', readonly=True)
     active = fields.Boolean(default=True)
     note = fields.Text(string="Notes")
 

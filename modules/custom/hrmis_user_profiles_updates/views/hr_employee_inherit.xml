@@ -29,8 +29,8 @@
                             <field name="hrmis_bps" />
                             <field name="hrmis_joining_date"  />
                             <field name="district_id" />
-                            <field name="hrmis_tehsil" />
                             <field name="facility_id" />
+                            <field name="hrmis_tehsil" />
                         </group>
 
                     </group>
@@ -70,22 +70,6 @@
                     </field>
                 </page>
             </xpath>
-
-            <!-- <xpath expr="//page[@name='hrmis_certifications_trainings']" position="after">
-                <page name="hrmis_personal_info" string="Personal Info">
-                <separator string="Staff Personal Information"/>
-
-                <group col="4">
-                    <group string="Personal Details">
-                        <field name="hrmis_cnic"/>
-                        <field name="hrmis_father_name"/>
-                        <field name="birthday"/>
-                        <field name="gender"/>
-                        <field name="hrmis_contact_info"/>
-                    </group>
-                </group>
-            </page>
-            </xpath> -->
             <xpath expr="//page[@name='skills_resume']" position="replace">
             </xpath>
             <xpath expr="//page[@name='public']" position="attributes">

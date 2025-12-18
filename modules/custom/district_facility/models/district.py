@@ -1,13 +1,13 @@
 from odoo import models, fields
 
 class District(models.Model):
-    _name = "x_district.master"
+    _name = "district.master"
     _description = "District"
     _sql_constraints = [
         ('name_unique', 'unique(name)', 'The district name must be unique!')
     ]
     tehsil_ids = fields.One2many(
-        'x_tehsil.master',
+        'tehsil.master',
         'district_id',
         string="Tehsils"
     )

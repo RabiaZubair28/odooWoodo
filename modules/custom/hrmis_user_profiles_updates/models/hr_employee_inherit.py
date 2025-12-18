@@ -34,11 +34,22 @@ class HREmployee(models.Model):
         ('20', '20')
     ],string="BPS")
 
-    hrmis_tehsil = fields.Many2one('x_tehsil.master', string="Current Posting Tehsil")
-    district_id = fields.Many2one('x_district.master', string="Current Posting District")
+    district_id = fields.Many2one(
+        'district.master',
+        string="Current Posting District"
+    )
+
     facility_id = fields.Many2one(
-        'x_facility.type', string="Current Posting Facility",
-        domain="[('district_id','=',district_id)]")
+        'facility.type',
+        string="Current Posting Facility",
+        domain="[('district_id','=',district_id)]"
+    )
+
+    hrmis_tehsil = fields.Many2one(
+        'tehsil.master',
+        string="Current Posting Tehsil",
+        domain="[('facility_id','=',facility_id)]"
+    )
 
     hrmis_contact_info = fields.Char(string="Contact Info")
     hrmis_description    = fields.Text(string="Additional Notes")
@@ -50,9 +61,6 @@ class HREmployee(models.Model):
     service_postings_from_date = fields.Date(related="hrmis_service_history_ids.from_date", readonly=True)
     service_postings_to_date = fields.Date(related="hrmis_service_history_ids.to_date", readonly=True)
     service_postings_commission_date = fields.Date(related="hrmis_service_history_ids.commission_date", readonly=True)
-
-
-
 
     _sql_constraints = [
             ('cnic_unique', 'unique(hrmis_cnic)', 'CNIC must be unique!')
@@ -88,14 +96,23 @@ class HREmployee(models.Model):
 
         return res
 
+
     @api.onchange('district_id')
     def _onchange_district(self):
-        """Filter facilities based on selected district"""
+        self.facility_id = False
+        self.hrmis_tehsil = False
+
         if self.district_id:
-            return {'domain': {'facility_id': [('district_id', '=', self.district_id.id)]}}
-        else:
-            return {'domain': {'facility_id': []}}
-        
+            return {
+                'domain': {
+                    'facility_id': [('district_id', '=', self.district_id.id)]
+                }
+            }
+        return {
+            'domain': {
+                'facility_id': []
+            }
+        }
 
     @api.constrains('joining_date', 'date_of_birth')
     def _check_date_range(self):

@@ -1,11 +1,12 @@
 from odoo import models, fields
 
 class FacilityType(models.Model):
-    _name = "x_facility.type"
+    _name = "facility.type"
     _description = "Facility Type"
 
     name = fields.Char(string="Facility Type Name", required=True)
-    district_id = fields.Many2one("x_district.master", string="District", required=True)
+    district_id = fields.Many2one("district.master", string="District", required=True)
+    tehsil_ids = fields.One2many('tehsil.master', 'facility_id', string="Tehsils")
     description = fields.Text(string="Description")
     capacity = fields.Integer(string="Capacity")
     active = fields.Boolean(string="Active", default=True)
