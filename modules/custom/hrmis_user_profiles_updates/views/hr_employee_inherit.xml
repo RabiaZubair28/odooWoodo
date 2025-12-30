@@ -16,11 +16,8 @@
                             <field name="hrmis_father_name" />
                             <field name="birthday" />
                             <field name="gender" />
-                            <field name="address_id" />
                             <field name="work_phone" />
                             <field name="hrmis_contact_info" />
-                            <field name="hrmis_description" />
-                            <field name="active" />
                         </group>
 
                         <group string="Job Information" col="2">
@@ -30,7 +27,6 @@
                             <field name="hrmis_joining_date"  />
                             <field name="district_id" />
                             <field name="facility_id" />
-                            <field name="hrmis_tehsil" />
                         </group>
 
                     </group>

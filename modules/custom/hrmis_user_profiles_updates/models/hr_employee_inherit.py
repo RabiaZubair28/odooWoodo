@@ -15,44 +15,49 @@ class HREmployee(models.Model):
         "employee_id",
         string="Qualifications & Trainings"
     )
-
+    hrmis_employee_id = fields.Char(
+    string="Employee ID / Service Number",
+    required=True,
+    copy=False
+    )
     hrmis_cnic = fields.Char(string="CNIC", required=True)
-    hrmis_father_name = fields.Char(string="Father's Name")
+    hrmis_father_name = fields.Char(string="Father's Name", required=True)
     hrmis_joining_date = fields.Date(string="Joining Date", required=True)
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
         ('other', 'Other')
     ], string="Gender", required=True)
-
-    hrmis_cadre = fields.Char(string="Cadre")
-    hrmis_designation = fields.Char(string="Designation")
-    hrmis_bps = fields.Selection([
-        ('17', '17'),
-        ('18', '18'),
-        ('19', '19'),
-        ('20', '20')
-    ],string="BPS")
+    hrmis_cadre = fields.Selection(
+    [
+        ('anesthesia', 'Anesthesia'),
+        ('public_health', 'Public Health'),
+        ('medical', 'Medical'),
+    ],
+    string="Cadre",
+    required=True
+)
+    hrmis_designation = fields.Char(string="Designation", required=True)
+    hrmis_bps = fields.Integer(
+    string="BPS Grade",
+    required=True
+    ) 
 
     district_id = fields.Many2one(
-        'district.master',
-        string="Current Posting District"
+        'hrmis.district.master',
+        string="Current District",
+        required=True
     )
 
     facility_id = fields.Many2one(
-        'facility.type',
-        string="Current Posting Facility",
+        'hrmis.facility.type',
+        string="Current Facility",
+        required=True,
         domain="[('district_id','=',district_id)]"
     )
 
-    hrmis_tehsil = fields.Many2one(
-        'tehsil.master',
-        string="Current Posting Tehsil",
-        domain="[('facility_id','=',facility_id)]"
-    )
 
     hrmis_contact_info = fields.Char(string="Contact Info")
-    hrmis_description    = fields.Text(string="Additional Notes")
 
 
     service_postings_district_id = fields.Many2one(related="hrmis_service_history_ids.district_id", readonly=True)
@@ -63,8 +68,9 @@ class HREmployee(models.Model):
     service_postings_commission_date = fields.Date(related="hrmis_service_history_ids.commission_date", readonly=True)
 
     _sql_constraints = [
-            ('cnic_unique', 'unique(hrmis_cnic)', 'CNIC must be unique!')
-        ]
+        ('cnic_unique', 'unique(hrmis_cnic)', 'CNIC must be unique!'),
+        ('employee_id_unique', 'unique(hrmis_employee_id)', 'Employee ID must be unique!')
+    ]
     
 
     @api.model_create_multi
@@ -100,7 +106,6 @@ class HREmployee(models.Model):
     @api.onchange('district_id')
     def _onchange_district(self):
         self.facility_id = False
-        self.hrmis_tehsil = False
 
         if self.district_id:
             return {
@@ -114,12 +119,17 @@ class HREmployee(models.Model):
             }
         }
 
-    @api.constrains('joining_date', 'date_of_birth')
+    @api.constrains('hrmis_joining_date', 'birthday')
     def _check_date_range(self):
         today = date.today()
         for rec in self:
-            if rec.joining_date and rec.joining_date > today:
+            if rec.hrmis_joining_date and rec.hrmis_joining_date > today:
                 raise ValidationError("Joining Date cannot be in the future.")
-            if rec.date_of_birth and rec.date_of_birth > today:
+            if rec.birthday and rec.birthday > today:
                 raise ValidationError("Date of Birth cannot be in the future.")
             
+    @api.constrains('hrmis_bps')
+    def _check_bps(self):
+        for rec in self:
+            if rec.hrmis_bps < 6 or rec.hrmis_bps > 22:
+                raise ValidationError("BPS must be between 6 and 22.")
