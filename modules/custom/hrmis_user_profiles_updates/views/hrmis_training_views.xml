@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <form string="Qualification / Training">
                 <group>
-                    <field name="employee_id" />
+                    <field name="employee_id" readonly="1"/>
                     <field name="record_type"/>
                     <field name="name"/>
                     <field name="venue"/>

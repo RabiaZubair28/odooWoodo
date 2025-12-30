@@ -41,7 +41,7 @@
                     <field name="hrmis_service_history_ids" mode="list,form">
                         <list string="Service History">
                                 <field name="from_date"/>
-                                <field name="to_date"/>
+                                <field name="end_date"/>
                                 <field name="commission_date"/>
                                 <field name="district_id"/>
                                 <field name="facility_id"/>

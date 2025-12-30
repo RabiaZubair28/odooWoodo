@@ -18,18 +18,18 @@ class HrmisServiceHistory(models.Model):
     )
 
     from_date = fields.Date(string="From Date")
-    to_date = fields.Date(string="To Date")
+    end_date = fields.Date(string="End Date")
     commission_date = fields.Date(string="Commission Date")
 
-    @api.constrains('from_date', 'to_date', 'commission_date')
+    @api.constrains('from_date', 'end_date', 'commission_date')
     def _check_date_range(self):
         today = date.today()
         for rec in self:
             if rec.from_date and rec.from_date > today:
                 raise ValidationError("From Date cannot be in the future.")
-            if rec.to_date and rec.to_date > today:
+            if rec.end_date and rec.end_date > today:
                 raise ValidationError("To Date cannot be in the future.")
             if rec.commission_date and rec.commission_date > today:
                 raise ValidationError("Commission Date cannot be in the future.")
-            if rec.from_date and rec.to_date and rec.to_date < rec.from_date:
+            if rec.from_date and rec.end_date and rec.end_date < rec.from_date:
                 raise ValidationError("To Date cannot be earlier than From Date.")
