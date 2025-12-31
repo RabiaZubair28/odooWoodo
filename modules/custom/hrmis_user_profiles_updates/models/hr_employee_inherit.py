@@ -64,7 +64,7 @@ class HREmployee(models.Model):
     service_postings_facility_id = fields.Many2one(related="hrmis_service_history_ids.facility_id", readonly=True)
 
     service_postings_from_date = fields.Date(related="hrmis_service_history_ids.from_date", readonly=True)
-    service_postings_to_date = fields.Date(related="hrmis_service_history_ids.to_date", readonly=True)
+    service_postings_end_date = fields.Date(related="hrmis_service_history_ids.end_date", readonly=True)
     service_postings_commission_date = fields.Date(related="hrmis_service_history_ids.commission_date", readonly=True)
 
     _sql_constraints = [
