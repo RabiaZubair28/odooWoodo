@@ -12,6 +12,7 @@
         'views/hrmis_training_views.xml',
         'views/hrmis_district_views.xml',
         'views/hrmis_facility_type_views.xml',
+        'data/res_user_data.xml',
     ],
     'installable': True,
     'application': False,
