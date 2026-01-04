@@ -27,29 +27,28 @@
 
 #         return response
 
+# from odoo import http
+# from odoo.http import request
+# from odoo.addons.web.controllers.home import Home
 
-from odoo import http
-from odoo.http import request
-from odoo.addons.web.controllers.home import Home
 
+# class CustomLogin(Home):
 
-class CustomLogin(Home):
+#     @http.route('/web/login', type='http', auth='public', website=True, sitemap=False)
+#     def web_login(self, redirect=None, **kw):
+#         response = super().web_login(redirect=redirect, **kw)
 
-    @http.route('/web/login', type='http', auth='public', website=True, sitemap=False)
-    def web_login(self, redirect=None, **kw):
-        response = super().web_login(redirect=redirect, **kw)
-
-        uid = request.session.uid
-        if uid:
-            user = request.env['res.users'].sudo().browse(uid)
+#         uid = request.session.uid
+#         if uid:
+#             user = request.env['res.users'].sudo().browse(uid)
             
-            # If user has temporary password, force reset
-            if getattr(user, 'is_temp_password', False):
-                return request.redirect('/force_password_reset')
+#             # If user has temporary password, force reset
+#             if getattr(user, 'is_temp_password', False):
+#                 return request.redirect('/force_password_reset')
             
-            # Otherwise, normal dashboard redirect
-            if redirect:
-                return request.redirect(redirect)
-            return request.redirect('/employees')
+#             # Otherwise, normal dashboard redirect
+#             # if redirect:
+#             #     return request.redirect(redirect)
+#             return request.redirect('/my/profile')
 
-        return response
+#         return response

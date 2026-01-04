@@ -1,3 +1,3 @@
 from . import main
-from . import welcome
-from . import auth
+from . import profile
+from . import services

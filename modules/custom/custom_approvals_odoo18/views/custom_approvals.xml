@@ -58,17 +58,13 @@
                     </notebook>
 
                 </sheet>
-            <footer>
-    <button name="redirect_dummy"
-        type="button"
-        class="btn-primary redirect_approval_btn">
-    Go to Webpage
-</button>
-
-
-</footer>
-
-
+                <footer>
+                    <button name="redirect_dummy"
+                        type="button"
+                        class="btn-primary redirect_approval_btn">
+                    Go to Webpage
+                </button>
+                </footer>
             </form>
         </field>
     </record>
@@ -197,12 +193,5 @@
               parent="menu_approvals_root"
               action="action_approval_action"
               sequence="40"/>
-
-
-
-
-
-
-
 
 </odoo>
