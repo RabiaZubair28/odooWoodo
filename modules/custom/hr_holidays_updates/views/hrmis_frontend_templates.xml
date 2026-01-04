@@ -182,7 +182,7 @@
                                 <div class="hrmis-result__sub">
                                     <t t-esc="(('facility_id' in emp._fields and emp.facility_id and emp.facility_id.name) or ('hrmis_facility_id' in emp._fields and emp.hrmis_facility_id and emp.hrmis_facility_id.name) or 'Place of posting')"/>
                                     <t t-if="('district_id' in emp._fields and emp.district_id and emp.district_id.name) or ('hrmis_district_id' in emp._fields and emp.hrmis_district_id and emp.hrmis_district_id.name)">
-                                        — <t t-esc="(('district_id' in emp._fields and emp.district_id and emp.district_id.name) or ('hrmis_district_id' in emp._fields and emp.hrmis_district_id and emp.hrmis_district_id.name)"/>
+                                        <!-- — <t t-esc="(('district_id' in emp._fields and emp.district_id and emp.district_id.name) or ('hrmis_district_id' in emp._fields and emp.hrmis_district_id and emp.hrmis_district_id.name)"/> -->
                                     </t>
                                 </div>
                             </div>
