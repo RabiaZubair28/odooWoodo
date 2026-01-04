@@ -7,6 +7,19 @@
   .o_main_navbar {
     display: none !important;
   }
+
+  /* Hide Odoo website "preview/back" controls (purple top-left arrow). */
+  .o_website_preview_top,
+  .o_website_preview,
+  .o_website_preview_top_left,
+  .o_website_preview_top_right,
+  .o_we_website_top_actions,
+  .o_we_toolbar,
+  .o_we_toolbar_wrapper,
+  .o_we_ui,
+  .o_skip_to_content {
+    display: none !important;
+  }
 }
 
 .hrmis-app {
