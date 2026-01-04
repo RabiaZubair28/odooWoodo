@@ -1,3 +1,4 @@
+
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
@@ -19,10 +20,10 @@ class HrLeaveAllocation(models.Model):
         readonly=True,
     )
 
-    @api.depends('employee_id', 'employee_id.gender', 'employee_id.gender')
+    @api.depends('employee_id', 'employee_id.gender')
     def _compute_employee_gender(self):
         for alloc in self:
-            alloc.employee_gender = alloc.employee_id.gender or alloc.employee_id.gender or False
+            alloc.employee_gender = alloc.employee_id.gender or False
 
     @api.depends('employee_id', 'employee_id.hrmis_joining_date', 'date_from')
     def _compute_employee_service_months(self):
@@ -90,4 +91,3 @@ class HrLeaveAllocation(models.Model):
                     f"This Time Off Type requires at least {required} months of service. "
                     "This employee is not eligible yet."
                 )
-

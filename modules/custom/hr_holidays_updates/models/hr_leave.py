@@ -65,13 +65,13 @@ class HrLeave(models.Model):
         help="Available balance for Leave Without Pay (EOL), computed using Odoo's leave balance engine.",
     )
 
-    @api.depends('employee_id', 'employee_id.hrmis_gender', 'employee_id.gender')
+    @api.depends('employee_id', 'employee_id.gender')
     def _compute_employee_gender(self):
         """
-        Prefer HRMIS gender (if available) and fall back to built-in hr.employee gender.
+        Use built-in hr.employee gender.
         """
         for leave in self:
-            leave.employee_gender = leave.employee_id.hrmis_gender or leave.employee_id.gender or False
+            leave.employee_gender = leave.employee_id.gender or False
 
     def _is_fitness_resume_duty_eligible(self, employee, ref_date):
         """
@@ -526,5 +526,3 @@ class HrLeave(models.Model):
                         f"Maximum duration for this Time Off Type is {lt.max_days_per_year} day(s) per year."
                     )
     
-
-

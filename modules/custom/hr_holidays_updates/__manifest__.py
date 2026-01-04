@@ -19,6 +19,9 @@
         'views/hr_holidays_views.xml',
         'views/hrmis_frontend_templates.xml',
         'views/hrmis_frontend_menu.xml',
+        "views/hrmis_profile_request_views.xml",
+        "views/hrmis_profile_approvals.xml",
+        "views/hrmis_profile_request_templates.xml",
     ],
     'assets': {
         'web.assets_frontend': [
