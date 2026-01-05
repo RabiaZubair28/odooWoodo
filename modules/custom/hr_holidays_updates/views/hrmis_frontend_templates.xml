@@ -250,7 +250,12 @@
 
         <!-- 🔹 TAB 1: USER PROFILE (YOUR ORIGINAL CONTENT) -->
         <div class="tab-pane fade show active" id="personal_data">
-
+            <div class="hrmis-panel__tools mb-3">
+                <a class="hrmis-btn hrmis-btn--primary"
+                t-att-href="'/hrmis/profile/request'">
+                    Request Profile Update
+                </a>
+            </div>
             <div class="hrmis-kv hrmis-kv--grid">
 
                 <div class="hrmis-kv__item">
