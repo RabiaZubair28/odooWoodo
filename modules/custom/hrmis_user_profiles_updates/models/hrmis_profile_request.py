@@ -12,7 +12,6 @@ class EmployeeProfileRequest(models.Model):
 
     employee_id = fields.Many2one(
         'hr.employee',
-        required=True,
         readonly=True
     )
 
@@ -31,57 +30,49 @@ class EmployeeProfileRequest(models.Model):
 
 
     hrmis_employee_id = fields.Char(
-        string="Employee ID / Service Number",
-        required=True
-    )
+        string="Employee ID / Service Number"    )
 
     hrmis_cnic = fields.Char(
         string="CNIC",
-        required=True
     )
 
     hrmis_father_name = fields.Char(
         string="Father's Name",
-        required=True
     )
 
     hrmis_joining_date = fields.Date(
         string="Joining Date",
-        required=True
     )
 
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
         ('other', 'Other')
-    ], required=True)
+    ])
 
     hrmis_cadre = fields.Selection([
         ('anesthesia', 'Anesthesia'),
         ('public_health', 'Public Health'),
         ('medical', 'Medical'),
-    ], required=True)
+    ])
 
     hrmis_designation = fields.Char(
-        string="Designation",
-        required=True
-    )
+        string="Designation"    )
 
     hrmis_bps = fields.Integer(
-        string="BPS Grade",
-        required=True
+        string="BPS Grade"
     )
 
     district_id = fields.Many2one(
         'hrmis.district.master',
         string="Current District",
-        required=True
+        required=False
     )
 
     facility_id = fields.Many2one(
         'hrmis.facility.type',
         string="Current Facility",
-        required=True,
+        required=False,
         domain="[('district_id','=',district_id)]"
     )
 
@@ -128,18 +119,18 @@ class EmployeeProfileRequest(models.Model):
                 }
             }
 
-    @api.constrains('hrmis_joining_date')
-    def _check_joining_date(self):
-        today = date.today()
-        for rec in self:
-            if rec.hrmis_joining_date and rec.hrmis_joining_date > today:
-                raise ValidationError("Joining Date cannot be in the future.")
+    # @api.constrains('hrmis_joining_date')
+    # def _check_joining_date(self):
+    #     today = date.today()
+    #     for rec in self:
+    #         if rec.hrmis_joining_date and rec.hrmis_joining_date > today:
+    #             raise ValidationError("Joining Date cannot be in the future.")
 
-    @api.constrains('hrmis_bps')
-    def _check_bps(self):
-        for rec in self:
-            if rec.hrmis_bps < 6 or rec.hrmis_bps > 22:
-                raise ValidationError("BPS must be between 6 and 22.")
+    # @api.constrains('hrmis_bps')
+    # def _check_bps(self):
+    #     for rec in self:
+    #         if rec.hrmis_bps < 6 or rec.hrmis_bps > 22:
+    #             raise ValidationError("BPS must be between 6 and 22.")
 
     # -------------------------------------------------
     # ACTIONS

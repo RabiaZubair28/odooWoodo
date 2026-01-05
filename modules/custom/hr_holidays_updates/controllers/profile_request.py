@@ -95,27 +95,50 @@ class HRMISProfileRequest(http.Controller):
             error = 'Invalid request.'
             return self._render_profile_form(employee, req, error=error)
 
-        # Validate mandatory district
-        district_id = post.get('district_id')
-        if not district_id:
-            error = 'Please select a District before submitting.'
+        # --------------------------
+        # VALIDATE REQUIRED FIELDS
+        # --------------------------
+        required_fields = {
+            'hrmis_employee_id': 'Employee ID / Service Number',
+            'hrmis_cnic': 'CNIC',
+            'hrmis_father_name': "Father's Name",
+            'gender': 'Gender',
+            'hrmis_joining_date': 'Joining Date',
+            'hrmis_bps': 'BPS',
+            'hrmis_cadre': 'Cadre',
+            'hrmis_designation': 'Designation',
+            'district_id': 'District',
+            'facility_id': 'Facility',
+        }
+
+        missing = []
+        for field, label in required_fields.items():
+            value = post.get(field)
+            if not value:
+                missing.append(label)
+
+        if missing:
+            error = "Please complete the following fields before submitting:\n• " + "\n• ".join(missing)
             return self._render_profile_form(employee, req, error=error)
 
-        # Optional facility
-        facility_id = post.get('facility_id') or False
+        # Convert IDs to integers
+        district_id = int(post.get('district_id'))
+        facility_id = int(post.get('facility_id'))
 
-        # Write the request
+        # --------------------------
+        # WRITE THE RECORD
+        # --------------------------
         req.write({
             'hrmis_employee_id': post.get('hrmis_employee_id'),
             'hrmis_cnic': post.get('hrmis_cnic'),
             'hrmis_father_name': post.get('hrmis_father_name'),
             'gender': post.get('gender'),
             'hrmis_joining_date': post.get('hrmis_joining_date'),
-            'hrmis_bps': post.get('hrmis_bps'),
+            'hrmis_bps': int(post.get('hrmis_bps')),
             'hrmis_cadre': post.get('hrmis_cadre'),
             'hrmis_designation': post.get('hrmis_designation'),
-            'district_id': int(district_id),
-            'facility_id': int(facility_id) if facility_id else False,
+            'district_id': district_id,
+            'facility_id': facility_id,
             'hrmis_contact_info': post.get('hrmis_contact_info'),
             'state': 'submitted',
         })
