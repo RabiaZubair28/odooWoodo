@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <!-- Leave Request: restrict Leave Types by employee gender -->
     <record id="view_hr_leave_form_gender_domain_inherit" model="ir.ui.view">
         <field name="name">hr.leave.form.gender.domain.inherit</field>

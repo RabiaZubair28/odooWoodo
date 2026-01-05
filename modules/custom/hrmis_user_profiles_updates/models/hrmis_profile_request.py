@@ -147,30 +147,8 @@ class EmployeeProfileRequest(models.Model):
     def action_submit(self):
         self.ensure_one()
 
-        required_fields = [
-            'district_id',
-            'facility_id',
-            'hrmis_employee_id',
-            'hrmis_cnic',
-            'hrmis_father_name',
-            'hrmis_joining_date',
-            'gender',
-            'hrmis_cadre',
-            'hrmis_designation',
-            'hrmis_bps',
-        ]
-
-        missing = [
-            self._fields[f].string
-            for f in required_fields
-            if not getattr(self, f)
-        ]
-
-        if missing:
-            raise UserError(
-                "Please complete the following fields before submitting:\n• "
-                + "\n• ".join(missing)
-            )
+        if self.state != 'draft':
+            return
 
         self.state = 'submitted'
 
@@ -256,16 +234,3 @@ class EmployeeProfileRequest(models.Model):
                 message_type="comment",
                 subtype_xmlid="mail.mt_comment",
             )
-
-    @api.constrains('employee_id', 'state')
-    def _check_multiple_requests(self):
-        for rec in self:
-            if rec.state == 'submitted':
-                count = self.search_count([
-                    ('employee_id', '=', rec.employee_id.id),
-                    ('state', '=', 'submitted'),
-                    ('id', '!=', rec.id)
-                ])
-                if count:
-                    raise ValidationError("You already have a pending request.")
-

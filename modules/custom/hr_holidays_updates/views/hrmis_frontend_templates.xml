@@ -28,6 +28,13 @@
                                         <div class="hrmis-user__value">
                                             <t t-esc="request.env.user.name"/>
                                         </div>
+                                        <t t-if="request.session.uid">
+                        <a href="/web/session/logout"
+                           class="btn btn-outline-danger btn-sm"
+                           style="font-weight: 600; border-radius: 8px;">
+                            Logout
+                        </a>
+                    </t>
                                     </div>
                                 </div>
                             </a>
@@ -60,6 +67,7 @@
                                t-att-href="current_employee and ('/hrmis/staff/%s' % current_employee.id) or '/hrmis/services'">
                                 User profile
                             </a>
+                            
                             <a t-attf-class="hrmis-nav__item #{'is-active' if active_menu == 'staff' else ''}" href="/hrmis/staff">Search staff</a>
                             <a class="hrmis-nav__item" href="#">Transfer requests</a>
                             <!-- <a class="hrmis-nav__item" href="#">Promotions</a>
@@ -70,6 +78,10 @@
                                t-att-href="current_employee and ('/hrmis/staff/%s/leave?tab=new' % current_employee.id) or '/hrmis/services'">
                                 Leave requests
                             </a>
+                             <!-- <a t-attf-class="hrmis-nav__item #{'is-active' if active_menu == 'manage_requests' else ''}"
+                               href="/hrmis/manage/requests?tab=leave">
+                                Manage Requests
+                            </a> -->
                            
                           
                         </nav>
@@ -188,106 +200,254 @@
             
 
                 <div class="hrmis-panel">
-                    <div class="hrmis-panel__header">
+                    <!-- <div class="hrmis-panel__header">
                         <div class="hrmis-panel__title">User profile</div>
-                            <div class="hrmis-panel__tools">
-                                <a class="hrmis-btn hrmis-btn--primary"
-                                t-att-href="'/hrmis/profile/request'">
-                                    Request Profile Update
-                                </a>
-
-                        </div>
-                    </div>
+                    </div> -->
                     <div class="hrmis-panel__body">
-                        <div class="hrmis-kv hrmis-kv--grid">
-                            <!-- Row 1 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Name</div>
-                                <div class="hrmis-kv__v"><t t-esc="employee.name or ''"/></div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Gender</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="((('gender' in employee._fields and employee.gender) or ('hrmis_gender' in employee._fields and employee.hrmis_gender) or '') or '').replace('_',' ').title()"/>
-                                </div>
-                            </div>
+                        <div class="card-body">
 
-                            <!-- Row 2 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Joining date</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="('hrmis_joining_date' in employee._fields and employee.hrmis_joining_date) or ('first_contract_date' in employee._fields and employee.first_contract_date) or ''"/>
-                                </div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">CNIC</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="('hrmis_cnic' in employee._fields and employee.hrmis_cnic) or ''"/>
-                                </div>
-                            </div>
+    <!-- TAB HEADERS -->
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active"
+                    data-bs-toggle="tab"
+                    data-bs-target="#personal_data"
+                    type="button">
+                User Profile
+            </button>
+        </li>
 
-                            <!-- Row 3 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Father name</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="('hrmis_father_name' in employee._fields and employee.hrmis_father_name) or ''"/>
-                                </div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">BPS</div>
-                                <div class="hrmis-kv__v"><t t-esc="('hrmis_bps' in employee._fields and employee.hrmis_bps) or ''"/></div>
-                            </div>
+        <li class="nav-item">
+            <button class="nav-link"
+                    data-bs-toggle="tab"
+                    data-bs-target="#posting"
+                    type="button">
+                Posting and Service History
+            </button>
+        </li>
 
-                            <!-- Row 4 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Designation</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="('hrmis_designation' in employee._fields and employee.hrmis_designation) or (employee.job_id and employee.job_id.name) or ''"/>
-                                </div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Department</div>
-                                <div class="hrmis-kv__v"><t t-esc="(employee.department_id and employee.department_id.name) or ''"/></div>
-                            </div>
+        <li class="nav-item">
+            <button class="nav-link"
+                    data-bs-toggle="tab"
+                    data-bs-target="#disciplinary"
+                    type="button">
+                Disciplinary Actions
+            </button>
+        </li>
 
-                            <!-- Row 5 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">District</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="(('district_id' in employee._fields and employee.district_id and employee.district_id.name) or ('hrmis_district_id' in employee._fields and employee.hrmis_district_id and employee.hrmis_district_id.name) or '')"/>
-                                </div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Facility</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="(('facility_id' in employee._fields and employee.facility_id and employee.facility_id.name) or ('hrmis_facility_id' in employee._fields and employee.hrmis_facility_id and employee.hrmis_facility_id.name) or '')"/>
-                                </div>
-                            </div>
+        <li class="nav-item">
+            <button class="nav-link"
+                    data-bs-toggle="tab"
+                    data-bs-target="#qualifications"
+                    type="button">
+                Trainings and Qualifications
+            </button>
+        </li>
+    </ul>
 
-                            <!-- Row 6 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Work email</div>
-                                <div class="hrmis-kv__v"><t t-esc="employee.work_email or ''"/></div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Work phone</div>
-                                <div class="hrmis-kv__v"><t t-esc="employee.work_phone or ''"/></div>
-                            </div>
+    <!-- TAB CONTENT -->
+    <div class="tab-content pt-3">
 
-                            <!-- Row 7 -->
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Mobile</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="employee.mobile_phone or (('hrmis_contact_info' in employee._fields and employee.hrmis_contact_info) or '')"/>
-                                </div>
-                            </div>
-                            <div class="hrmis-kv__item">
-                                <div class="hrmis-kv__k">Manager</div>
-                                <div class="hrmis-kv__v">
-                                    <t t-esc="(employee.parent_id and employee.parent_id.name) or (('coach_id' in employee._fields and employee.coach_id and employee.coach_id.name) or '')"/>
-                                </div>
-                            </div>
-                        </div>
+        <!-- 🔹 TAB 1: USER PROFILE (YOUR ORIGINAL CONTENT) -->
+        <div class="tab-pane fade show active" id="personal_data">
+
+            <div class="hrmis-kv hrmis-kv--grid">
+
+                <div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Name</div>
+<div class="hrmis-kv__v">
+<t t-esc="employee.name or ''"/>
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Gender</div>
+<div class="hrmis-kv__v">
+<t t-esc="((('gender' in employee._fields and employee.gender) or ('hrmis_gender' in employee._fields and employee.hrmis_gender) or '') or '').replace('_',' ').title()"/>
+</div>
+</div>
+<!--  Row 2  -->
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Joining date</div>
+<div class="hrmis-kv__v">
+<t t-esc="('hrmis_joining_date' in employee._fields and employee.hrmis_joining_date) or ('first_contract_date' in employee._fields and employee.first_contract_date) or ''"/>
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">CNIC</div>
+<div class="hrmis-kv__v">
+<t t-esc="employee.hrmis_cnic or ''"/>
+</div>
+</div>
+<!--  Row 3  -->
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Father name</div>
+<div class="hrmis-kv__v">
+<t t-esc="employee.hrmis_father_name or ''"/>
+
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">BPS</div>
+<div class="hrmis-kv__v">
+<t t-esc="('hrmis_bps' in employee._fields and employee.hrmis_bps) or ''"/>
+</div>
+</div>
+<!--  Row 4  -->
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Designation</div>
+<div class="hrmis-kv__v">
+<t t-esc="('hrmis_designation' in employee._fields and employee.hrmis_designation) or (employee.job_id and employee.job_id.name) or ''"/>
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Department</div>
+<div class="hrmis-kv__v">
+<t t-esc="(employee.department_id and employee.department_id.name) or ''"/>
+</div>
+</div>
+<!--  Row 5  -->
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">District</div>
+<div class="hrmis-kv__v">
+<t t-esc="(('district_id' in employee._fields and employee.district_id and employee.district_id.name) or ('hrmis_district_id' in employee._fields and employee.hrmis_district_id and employee.hrmis_district_id.name) or '')"/>
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Facility</div>
+<div class="hrmis-kv__v">
+<t t-esc="(('facility_id' in employee._fields and employee.facility_id and employee.facility_id.name) or ('hrmis_facility_id' in employee._fields and employee.hrmis_facility_id and employee.hrmis_facility_id.name) or '')"/>
+</div>
+</div>
+<!--  Row 6  -->
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Work email</div>
+<div class="hrmis-kv__v">
+<t t-esc="employee.work_email or ''"/>
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Work phone</div>
+<div class="hrmis-kv__v">
+<t t-esc="employee.work_phone or ''"/>
+</div>
+</div>
+<!--  Row 7  -->
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Mobile</div>
+<div class="hrmis-kv__v">
+<t t-esc="employee.mobile_phone or (('hrmis_contact_info' in employee._fields and employee.hrmis_contact_info) or '')"/>
+</div>
+</div>
+<div class="hrmis-kv__item">
+<div class="hrmis-kv__k">Manager</div>
+<div class="hrmis-kv__v">
+<t t-esc="(employee.parent_id and employee.parent_id.name) or (('coach_id' in employee._fields and employee.coach_id and employee.coach_id.name) or '')"/>
+</div>
+</div>
+
+                <!-- keep all remaining kv rows here as-is -->
+
+            </div>
+        </div>
+
+        <!-- 🔹 TAB 2: POSTING -->
+        <div class="tab-pane fade" id="posting">
+            <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>From Date</th>
+                            <th>To Date</th>
+                            <th>Commission Date</th>
+                            <th>District</th>
+                            <th>Facility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-if="service_history">
+                            <t t-foreach="employee.service_history_ids" t-as="history">
+                                <tr>
+                                    <td><t t-esc="history.from_date or ''"/></td>
+                                    <td><t t-esc="history.end_date or ''"/></td>
+                                    <td><t t-esc="history.commission_date or ''"/></td>
+                                    <td><t t-esc="history.district_id.name or 'N/A'"/></td>
+                                    <td><t t-esc="history.facility_id.name or 'N/A'"/></td>
+                                </tr>
+                            </t>
+                        </t>
+                        <t t-if="not service_history">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No service history available.</td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+        </div>
+
+        <!-- 🔹 TAB 3: DISCIPLINARY -->
+        <div class="tab-pane fade" id="disciplinary">
+            <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Case Type</th>
+                            <th>Reference No</th>
+                            <th>Initiation Date</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No disciplinary records found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+        </div>
+
+        <!-- 🔹 TAB 4: QUALIFICATIONS -->
+        <div class="tab-pane fade" id="qualifications">
+            <table class="table table-bordered table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>Type</th>
+            <th>Training/Degree Name</th>
+            <th>Venue</th>
+            <th>Completion Date</th>
+            <th>Certificate</th>
+        </tr>
+    </thead>
+    <tbody>
+        <t t-set="training_records" t-value="request.env['hrmis.training.record'].sudo().search([('employee_id','=',employee.id)])"/>
+<t t-if="training_records">
+    <t t-foreach="training_records" t-as="record">
+        <tr>
+            <td><t t-esc="dict(record._fields['record_type'].selection).get(record.record_type) or 'N/A'"/></td>
+            <td><t t-esc="record.name or 'N/A'"/></td>
+            <td><t t-esc="record.venue or 'N/A'"/></td>
+            <td><t t-esc="record.completion_date or ''"/></td>
+            <td>
+                <t t-if="record.certificate_uploaded">
+                    <a t-att-href="'/web/content/hrmis.training.record/%s/certificate_file?download=true' % record.id"
+                       class="btn btn-sm btn-outline-primary">Download</a>
+                </t>
+                <t t-else=""><span class="text-muted">Not Uploaded</span></t>
+            </td>
+        </tr>
+    </t>
+</t>
+<t t-if="not training_records">
+    <tr>
+        <td colspan="5" class="text-center text-muted">No training records available.</td>
+    </tr>
+</t>
+
+    </tbody>
+</table>
+
+        </div>
+
+    </div>
+</div>
+
                     </div>
                 </div>
             </div>
@@ -546,6 +706,88 @@
         </t>
     </template>
 
+    <template id="hrmis_manage_requests" name="HRMIS Manage Requests">
+        <t t-call="hr_holidays_updates.hrmis_ui_layout">
+            <div class="hrmis-panel">
+                <div class="hrmis-panel__header hrmis-panel__header--tabs hrmis-panel__header--tabs--manage">
+                    <a t-attf-class="hrmis-tab hrmis-tab--manage #{'is-active' if tab == 'allocation' else ''}"
+                       t-att-href="'/hrmis/manage/requests?tab=allocation'">
+                        Manage Allocation Requests
+                    </a>
+                    <a t-attf-class="hrmis-tab hrmis-tab--manage #{'is-active' if tab == 'leave' else ''}"
+                       t-att-href="'/hrmis/manage/requests?tab=leave'">
+                        Manage Leave Requests
+                    </a>
+                </div>
+
+                <div class="hrmis-panel__body">
+                    <t t-if="tab == 'leave'">
+                        <t t-if="not leaves">
+                            <div class="hrmis-empty">No leave requests pending your action.</div>
+                        </t>
+                        <t t-foreach="range(len(leaves))" t-as="idx0">
+                            <t t-set="lv" t-value="leaves[idx0]"/>
+                            <div class="hrmis-leave-row">
+                                <div class="hrmis-leave-row__cell hrmis-leave-row__sno"><t t-esc="idx0 + 1"/></div>
+                                <div class="hrmis-leave-row__cell">
+                                    <div class="strong">
+                                        <t t-esc="lv.employee_id.name"/>,
+                                        <t t-esc="(('facility_id' in lv.employee_id._fields and lv.employee_id.facility_id and lv.employee_id.facility_id.name) or ('hrmis_facility_id' in lv.employee_id._fields and lv.employee_id.hrmis_facility_id and lv.employee_id.hrmis_facility_id.name) or 'Facility name')"/>
+                                    </div>
+                                    <div class="sub">
+                                        <t t-esc="(('district_id' in lv.employee_id._fields and lv.employee_id.district_id and lv.employee_id.district_id.name) or ('hrmis_district_id' in lv.employee_id._fields and lv.employee_id.hrmis_district_id and lv.employee_id.hrmis_district_id.name) or 'District name')"/>
+                                    </div>
+                                </div>
+                                <div class="hrmis-leave-row__cell"><t t-esc="lv.holiday_status_id.name"/></div>
+                                <div class="hrmis-leave-row__cell">
+                                    <t t-esc="lv.request_date_from"/> to <t t-esc="lv.request_date_to"/>
+                                </div>
+                                <div class="hrmis-leave-row__cell hrmis-leave-row__actions">
+                                    <a class="hrmis-btn hrmis-btn--outline" t-att-href="'/hrmis/leave/%s' % lv.id">View</a>
+                                    <form t-att-action="'/hrmis/leave/%s/approve' % lv.id" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <button class="hrmis-btn hrmis-btn--primary" type="submit">Approve</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <t t-if="tab == 'allocation'">
+                        <t t-if="not allocations">
+                            <div class="hrmis-empty">No allocation requests pending your action.</div>
+                        </t>
+                        <t t-foreach="range(len(allocations))" t-as="idx0">
+                            <t t-set="al" t-value="allocations[idx0]"/>
+                            <div class="hrmis-leave-row">
+                                <div class="hrmis-leave-row__cell hrmis-leave-row__sno"><t t-esc="idx0 + 1"/></div>
+                                <div class="hrmis-leave-row__cell">
+                                    <div class="strong">
+                                        <t t-esc="al.employee_id.name"/>,
+                                        <t t-esc="(('facility_id' in al.employee_id._fields and al.employee_id.facility_id and al.employee_id.facility_id.name) or ('hrmis_facility_id' in al.employee_id._fields and al.employee_id.hrmis_facility_id and al.employee_id.hrmis_facility_id.name) or 'Facility name')"/>
+                                    </div>
+                                    <div class="sub">
+                                        <t t-esc="(('district_id' in al.employee_id._fields and al.employee_id.district_id and al.employee_id.district_id.name) or ('hrmis_district_id' in al.employee_id._fields and al.employee_id.hrmis_district_id and al.employee_id.hrmis_district_id.name) or 'District name')"/>
+                                    </div>
+                                </div>
+                                <div class="hrmis-leave-row__cell"><t t-esc="al.holiday_status_id.name"/></div>
+                                <div class="hrmis-leave-row__cell">
+                                    <t t-esc="al.number_of_days"/> day(s)
+                                </div>
+                                <div class="hrmis-leave-row__cell hrmis-leave-row__actions">
+                                    <a class="hrmis-btn hrmis-btn--outline" t-att-href="'/hrmis/allocation/%s' % al.id">View</a>
+                                    <form t-att-action="'/hrmis/allocation/%s/approve' % al.id" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <button class="hrmis-btn hrmis-btn--primary" type="submit">Approve</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
  
 
     <template id="hrmis_allocation_view" name="HRMIS Allocation View">

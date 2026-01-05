@@ -51,10 +51,11 @@
                     <div class="card shadow-sm h-100">
                         <div class="card-body">
                             <h5 class="card-title">Approvals</h5>
-                            <a href="/web#action=custom_approvals_odoo18.action_approval_request"
-                               class="btn btn-outline-primary w-100">
-                                Requests
-                            </a>
+                            <a href="/approvals"
+                                class="btn btn-outline-primary w-100">
+                                    Requests
+                                </a>
+
                         </div>
                     </div>
                 </div>

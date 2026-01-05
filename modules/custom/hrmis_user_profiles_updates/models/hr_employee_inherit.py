@@ -17,16 +17,17 @@ class HREmployee(models.Model):
     )
     hrmis_employee_id = fields.Char(
     string="Employee ID / Service Number",
+    required=True,
     copy=False
     )
-    hrmis_cnic = fields.Char(string="CNIC")
-    hrmis_father_name = fields.Char(string="Father's Name")
-    hrmis_joining_date = fields.Date(string="Joining Date")
+    hrmis_cnic = fields.Char(string="CNIC", required=True)
+    hrmis_father_name = fields.Char(string="Father's Name", required=True)
+    hrmis_joining_date = fields.Date(string="Joining Date", required=True)
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
         ('other', 'Other')
-    ], string="Gender")
+    ], string="Gender", required=True)
     hrmis_cadre = fields.Selection(
     [
         ('anesthesia', 'Anesthesia'),
@@ -34,20 +35,24 @@ class HREmployee(models.Model):
         ('medical', 'Medical'),
     ],
     string="Cadre",
+    required=True
 )
-    hrmis_designation = fields.Char(string="Designation")
+    hrmis_designation = fields.Char(string="Designation", required=True)
     hrmis_bps = fields.Integer(
-    string="BPS Grade"
+    string="BPS Grade",
+    required=True
     ) 
 
     district_id = fields.Many2one(
         'hrmis.district.master',
-        string="Current District"
+        string="Current District",
+        required=True
     )
 
     facility_id = fields.Many2one(
         'hrmis.facility.type',
         string="Current Facility",
+        required=True,
         domain="[('district_id','=',district_id)]"
     )
 

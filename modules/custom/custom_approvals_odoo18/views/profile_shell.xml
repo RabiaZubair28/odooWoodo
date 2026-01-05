@@ -1,7 +1,9 @@
 
 <odoo>
 <template id="profile_shell" name="User Profile Shell">
-    <t t-call="website.layout">
+
+    <t t-call="custom_approvals_odoo18.profile_shell_layout">
+    <!-- <t t-call="website.layout"> -->
         <div class="container mt-5">
             <div class="row">
 

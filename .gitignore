@@ -501,5 +501,4 @@ cython_debug/
 ## Manual Additions
 
 .env.prod
-volumes/**.env
-volumes/
+volumes/**

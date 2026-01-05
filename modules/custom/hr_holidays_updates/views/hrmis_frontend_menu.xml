@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    
     <!-- Actions that open the HRMIS UI inside Odoo (Time Off menu) -->
     <record id="action_hrmis_services" model="ir.actions.act_url">
         <field name="name">HRMIS Services</field>
@@ -16,12 +17,6 @@
     <record id="action_hrmis_leave_requests" model="ir.actions.act_url">
         <field name="name">HRMIS Leave Requests</field>
         <field name="url">/hrmis/leave/requests</field>
-        <field name="target">self</field>
-    </record>
-
-    <record id="action_hrmis_profile_requests" model="ir.actions.act_url">
-        <field name="name">Profile Update Requests</field>
-        <field name="url">/hrmis/profile/approvals</field>
         <field name="target">self</field>
     </record>
 
@@ -46,15 +41,6 @@
         parent="hr_holidays.menu_hr_holidays_management"
         action="action_hrmis_leave_requests"
         sequence="2"
-    />
-
-    <menuitem
-        id="menu_hrmis_profile_requests"
-        name="Profile Update Requests"
-        parent="hr_holidays.menu_hr_holidays_management"
-        action="action_hrmis_profile_requests"
-        groups="hr.group_hr_manager"
-        sequence="3"
     />
 </odoo>
 

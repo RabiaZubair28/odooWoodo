@@ -169,29 +169,29 @@
     <!-- ========================= -->
 
     <!-- Main Approvals Menu -->
-    <!-- <menuitem id="menu_approvals_root"
+    <menuitem id="menu_approvals_root"
               name="Approvals"
               sequence="10" />
 
-    
+    <!-- Approval Types -->
     <menuitem id="menu_approval_types"
               name="Approval Types"
               parent="menu_approvals_root"
               action="action_approval_type"
               sequence="20"/>
 
-   
+    <!-- Approval Requests -->
     <menuitem id="menu_approval_requests"
               name="Approval Requests"
               parent="menu_approvals_root"
               action="action_approval_request"
               sequence="30"/>
 
-    
+    <!-- Approval Actions -->
     <menuitem id="menu_approval_actions"
               name="Approval Actions"
               parent="menu_approvals_root"
               action="action_approval_action"
-              sequence="40"/> -->
+              sequence="40"/>
 
 </odoo>

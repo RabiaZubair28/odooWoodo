@@ -7,6 +7,19 @@
   .o_main_navbar {
     display: none !important;
   }
+
+  /* Hide Odoo website "preview/back" controls (purple top-left arrow). */
+  .o_website_preview_top,
+  .o_website_preview,
+  .o_website_preview_top_left,
+  .o_website_preview_top_right,
+  .o_we_website_top_actions,
+  .o_we_toolbar,
+  .o_we_toolbar_wrapper,
+  .o_we_ui,
+  .o_skip_to_content {
+    display: none !important;
+  }
 }
 
 .hrmis-app {
@@ -17,7 +30,7 @@
 
 .hrmis-topbar {
   height: 92px;
-  background: linear-gradient(180deg, #0d5b66 0%, #0b4f59 100%);
+  background: linear-gradient(180deg, #064526 0%, #064526 100%);
   color: #fff;
   display: grid;
   grid-template-columns: 320px 1fr 320px;
@@ -94,12 +107,12 @@
   width: 64px;
   height: 64px;
   border-radius: 999px;
-  border: 2px solid #0d5b66;
+  border: 2px solid #064526;
   background: radial-gradient(circle at 35% 35%, rgba(13, 91, 102, 0.15), transparent 60%);
 }
 .hrmis-brand__title {
   font-weight: 700;
-  color: #0d5b66;
+  color: #064526;
   letter-spacing: 0.3px;
 }
 
@@ -119,9 +132,9 @@
   font-weight: 600;
 }
 .hrmis-nav__item.is-active {
-  background: linear-gradient(180deg, #0d5b66 0%, #0b4f59 100%);
+  background: linear-gradient(180deg, #064526 0%, #064526 100%);
   color: #fff;
-  border-color: #0b4f59;
+  border-color: #064526;
 }
 
 .hrmis-powered {
@@ -138,7 +151,7 @@
 
 .hrmis-footer-bar {
   height: 58px;
-  background: linear-gradient(180deg, #0d5b66 0%, #0b4f59 100%);
+  background: linear-gradient(180deg, #064526 0%, #064526 100%);
 }
 
 .hrmis-panel {
@@ -189,8 +202,8 @@
   cursor: pointer;
 }
 .hrmis-btn--primary {
-  background: #0b4f59;
-  border-color: #0b4f59;
+  background: #064526;
+  border-color: #064526;
   color: #fff;
 }
 .hrmis-btn--outline {
@@ -359,7 +372,7 @@
   white-space: nowrap;
 }
 .hrmis-tab.is-active {
-  background: #0b4f59;
+  background: #064526;
   color: #fff;
 }
 

@@ -4,7 +4,7 @@
     'summary': "Staff Personal Information Profile - Read Only for Employees",
     'category': 'Human Resources',
     'author': "Humza Aqeel Shaikh",
-    'depends': ['hr', 'custom_approvals_odoo18', 'auditlog'],
+    'depends': ['hr'],
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
