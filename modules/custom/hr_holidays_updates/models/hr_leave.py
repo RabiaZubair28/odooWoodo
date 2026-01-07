@@ -79,6 +79,7 @@ class HrLeave(models.Model):
         "res.users",
         string="Pending Approvers",
         compute="_compute_pending_approver_ids",
+        store=True,
         compute_sudo=True,
         help="Users allowed to approve this leave at the current step (sequential mode only exposes the next approver).",
     )
@@ -114,6 +115,18 @@ class HrLeave(models.Model):
                 else:
                     users |= pending.mapped("user_id")
             leave.pending_approver_ids = users
+
+    def _ensure_sequential_approver_group(self, users):
+        """
+        Ensure validators can be restricted by record rules even if they have
+        broad Time Off access (e.g. they see "All Time Off").
+        """
+        group = self.env.ref("hr_holidays_updates.group_leave_sequential_approver", raise_if_not_found=False)
+        if not group:
+            return
+        users = users.exists()
+        if users:
+            users.sudo().write({"groups_id": [(4, group.id)]})
 
     @api.depends('employee_id', 'employee_id.gender')
     def _compute_employee_gender(self):
@@ -627,6 +640,7 @@ class HrLeave(models.Model):
                 # Prefer explicit ordering when configured.
                 if flow.approver_line_ids:
                     ordered = flow._ordered_approver_lines()
+                    leave._ensure_sequential_approver_group(ordered.mapped("user_id"))
                     for line in ordered:
                         self.env["hr.leave.approval.status"].create({
                             "leave_id": leave.id,
@@ -637,7 +651,9 @@ class HrLeave(models.Model):
                     continue
 
                 # Backward compatible fallback (deterministic by user id).
-                for idx, user in enumerate(flow.approver_ids.sorted(lambda u: u.id), start=1):
+                fallback_users = flow.approver_ids.sorted(lambda u: u.id)
+                leave._ensure_sequential_approver_group(fallback_users)
+                for idx, user in enumerate(fallback_users, start=1):
                     self.env["hr.leave.approval.status"].create({
                         "leave_id": leave.id,
                         "flow_id": flow.id,

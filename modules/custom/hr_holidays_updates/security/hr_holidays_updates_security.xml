@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Group used to apply sequential-approver record rules -->
+    <record id="group_leave_sequential_approver" model="res.groups">
+        <field name="name">Leave Sequential Approver</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+    </record>
+
+    <!-- When a leave is waiting for approval (state=confirm), validators should only
+         see it when it is THEIR turn. Outside confirm state, do not restrict. -->
+    <record id="rule_hr_leave_sequential_approver_confirm_visibility" model="ir.rule">
+        <field name="name">Sequential approvers: only current pending leaves</field>
+        <field name="model_id" ref="hr_holidays.model_hr_leave"/>
+        <field name="groups" eval="[(4, ref('hr_holidays_updates.group_leave_sequential_approver'))]"/>
+        <field name="domain_force">
+            [
+                '|',
+                ('state', '!=', 'confirm'),
+                '|', '|',
+                ('employee_id.user_id', '=', user.id),
+                ('create_uid', '=', user.id),
+                ('pending_approver_ids', 'in', [user.id])
+            ]
+        </field>
+    </record>
+
+    <!-- Approval status rows must only be readable when the leave itself is readable
+         (avoid leaking a future-step leave to later approvers). -->
+    <record id="rule_hr_leave_approval_status_sequential_visibility" model="ir.rule">
+        <field name="name">Sequential approvers: approval status visibility</field>
+        <field name="model_id" ref="hr_holidays_updates.model_hr_leave_approval_status"/>
+        <field name="groups" eval="[(4, ref('hr_holidays_updates.group_leave_sequential_approver'))]"/>
+        <field name="domain_force">
+            [
+                '|',
+                ('leave_id.state', '!=', 'confirm'),
+                '|', '|',
+                ('leave_id.employee_id.user_id', '=', user.id),
+                ('leave_id.create_uid', '=', user.id),
+                ('leave_id.pending_approver_ids', 'in', [user.id])
+            ]
+        </field>
+    </record>
+</odoo>
+
