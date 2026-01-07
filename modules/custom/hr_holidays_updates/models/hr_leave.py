@@ -91,6 +91,9 @@ class HrLeave(models.Model):
     approver_user_ids = fields.Many2many(
         "res.users",
         string="All Approvers",
+        relation="hr_leave_approver_user_rel",
+        column1="leave_id",
+        column2="user_id",
         compute="_compute_approver_user_ids",
         store=True,
         compute_sudo=True,
