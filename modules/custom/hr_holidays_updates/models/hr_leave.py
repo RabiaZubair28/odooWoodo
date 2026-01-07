@@ -116,52 +116,10 @@ class HrLeave(models.Model):
                     users |= pending.mapped("user_id")
             leave.pending_approver_ids = users
 
-    def _ensure_sequential_approver_group(self, users):
-        """
-        Ensure validators can be restricted by record rules even if they have
-        broad Time Off access (e.g. they see "All Time Off").
-        """
-        group = self.env.ref("hr_holidays_updates.group_leave_sequential_approver", raise_if_not_found=False)
-        if not group:
-            return
-        users = users.exists()
-        if users:
-            users.sudo().write({"groups_id": [(4, group.id)]})
-
-    @api.model
-    def hrmis_sync_sequential_approver_group(self):
-        """
-        Migration/helper: ensure all configured validators are members of the
-        sequential-approver group.
-
-        Why:
-        - Existing databases may already have validators configured before this
-          feature existed. If they are not in the group, the record rule won't
-          restrict "All Time Off" visibility.
-        """
-        group = self.env.ref("hr_holidays_updates.group_leave_sequential_approver", raise_if_not_found=False)
-        if not group:
-            return True
-
-        users = self.env["res.users"].browse()
-
-        # 1) Users from configured custom flows (new engine)
-        FlowLine = self.env["hr.leave.approval.flow.line"].sudo()
-        users |= FlowLine.search([]).mapped("user_id")
-
-        Flow = self.env["hr.leave.approval.flow"].sudo()
-        users |= Flow.search([]).mapped("approver_ids")
-
-        # 2) Users from leave type validators list (ohrms_holidays_approval)
-        LeaveType = self.env["hr.leave.type"].sudo()
-        multi_types = LeaveType.search([("leave_validation_type", "=", "multi")])
-        # `validator_ids` is Many2many to `hr.holidays.validators`
-        users |= multi_types.mapped("validator_ids").mapped("user_id")
-
-        users = users.filtered(lambda u: u and not u.share)
-        if users:
-            users.sudo().write({"groups_id": [(4, group.id)]})
-        return True
+    # Note: sequential *visibility* is enforced by record rules (see
+    # `security/hr_holidays_updates_security.xml`). We intentionally avoid
+    # relying on dynamic group membership sync, because module upgrades do not
+    # reload Python code in a running Odoo server.
 
     @api.depends('employee_id', 'employee_id.gender')
     def _compute_employee_gender(self):
@@ -675,7 +633,6 @@ class HrLeave(models.Model):
                 # Prefer explicit ordering when configured.
                 if flow.approver_line_ids:
                     ordered = flow._ordered_approver_lines()
-                    leave._ensure_sequential_approver_group(ordered.mapped("user_id"))
                     for line in ordered:
                         self.env["hr.leave.approval.status"].create({
                             "leave_id": leave.id,
@@ -687,7 +644,6 @@ class HrLeave(models.Model):
 
                 # Backward compatible fallback (deterministic by user id).
                 fallback_users = flow.approver_ids.sorted(lambda u: u.id)
-                leave._ensure_sequential_approver_group(fallback_users)
                 for idx, user in enumerate(fallback_users, start=1):
                     self.env["hr.leave.approval.status"].create({
                         "leave_id": leave.id,
