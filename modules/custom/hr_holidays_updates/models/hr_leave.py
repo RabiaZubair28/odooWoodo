@@ -634,7 +634,7 @@ class HrLeave(models.Model):
                 if flow.approver_line_ids:
                     ordered = flow._ordered_approver_lines()
                     for line in ordered:
-                        self.env["hr.leave.approval.status"].create({
+                        self.env["hr.leave.approval.status"].sudo().create({
                             "leave_id": leave.id,
                             "flow_id": flow.id,
                             "user_id": line.user_id.id,
@@ -645,7 +645,7 @@ class HrLeave(models.Model):
                 # Backward compatible fallback (deterministic by user id).
                 fallback_users = flow.approver_ids.sorted(lambda u: u.id)
                 for idx, user in enumerate(fallback_users, start=1):
-                    self.env["hr.leave.approval.status"].create({
+                    self.env["hr.leave.approval.status"].sudo().create({
                         "leave_id": leave.id,
                         "flow_id": flow.id,
                         "user_id": user.id,
