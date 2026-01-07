@@ -87,11 +87,18 @@ class HrLeave(models.Model):
     @api.depends(
         "state",
         "holiday_status_id",
+        "holiday_status_id.leave_validation_type",
+        "holiday_status_id.validator_ids",
+        "holiday_status_id.validator_ids.user_id",
+        "holiday_status_id.validator_ids.sequence",
         "approval_step",
         "approval_status_ids.approved",
         "approval_status_ids.sequence",
         "approval_status_ids.flow_id",
         "approval_status_ids.user_id",
+        "validation_status_ids",
+        "validation_status_ids.user_id",
+        "validation_status_ids.validation_status",
     )
     def _compute_pending_approver_ids(self):
         Flow = self.env["hr.leave.approval.flow"]
@@ -114,6 +121,29 @@ class HrLeave(models.Model):
                     users |= pending[0].user_id
                 else:
                     users |= pending.mapped("user_id")
+
+            # Fallback: if no statuses/flows are initialized yet, derive the
+            # "next approver" from the ohrms_holidays_approval validator list.
+            if not users and getattr(leave.holiday_status_id, "leave_validation_type", False) == "multi":
+                validators = getattr(leave.holiday_status_id, "validator_ids", self.env["hr.holidays.validators"].browse())
+                validators = validators.sorted(lambda v: (getattr(v, "sequence", 10), v.id))
+                if validators:
+                    # Prefer the real per-leave approval flags from leave.validation.status
+                    # when available.
+                    status_map = {}
+                    for st in getattr(leave, "validation_status_ids", self.env["leave.validation.status"].browse()):
+                        if st.user_id:
+                            status_map[st.user_id.id] = bool(getattr(st, "validation_status", False))
+
+                    next_user = None
+                    for v in validators:
+                        if not v.user_id:
+                            continue
+                        if not status_map.get(v.user_id.id, False):
+                            next_user = v.user_id
+                            break
+                    if next_user:
+                        users |= next_user
             leave.pending_approver_ids = users
 
     # Note: sequential *visibility* is enforced by record rules (see

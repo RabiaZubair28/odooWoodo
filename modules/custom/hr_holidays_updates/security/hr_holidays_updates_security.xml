@@ -13,8 +13,8 @@
       currently pending for them (pending_approver_ids).
     - Requesters (employee user / creator) can always see their own leaves.
     -->
-    <record id="rule_hr_leave_sequential_visibility_any_approver" model="ir.rule">
-        <field name="name">Sequential approval: hide future-step leaves from approvers</field>
+    <record id="rule_hr_leave_sequential_visibility_any_validator" model="ir.rule">
+        <field name="name">Sequential approval: hide future-step leaves from validators</field>
         <field name="model_id" ref="hr_holidays.model_hr_leave"/>
         <field name="domain_force">
             [
@@ -24,7 +24,7 @@
                     ('employee_id.user_id', '=', user.id),
                     ('create_uid', '=', user.id),
                     '|',
-                        ('approval_status_ids.user_id', '!=', user.id),
+                        ('holiday_status_id.validator_ids.user_id', 'not in', [user.id]),
                         ('pending_approver_ids', 'in', [user.id])
             ]
         </field>
@@ -32,7 +32,7 @@
 
     <!-- Apply the same "future-step hiding" to the status rows to avoid leaking
          information through the one2many. -->
-    <record id="rule_hr_leave_approval_status_sequential_visibility_any_approver" model="ir.rule">
+    <record id="rule_hr_leave_approval_status_sequential_visibility_any_validator" model="ir.rule">
         <field name="name">Sequential approval: approval status visibility</field>
         <field name="model_id" ref="hr_holidays_updates.model_hr_leave_approval_status"/>
         <field name="domain_force">
@@ -43,7 +43,7 @@
                     ('leave_id.employee_id.user_id', '=', user.id),
                     ('leave_id.create_uid', '=', user.id),
                     '|',
-                        ('leave_id.approval_status_ids.user_id', '!=', user.id),
+                        ('leave_id.holiday_status_id.validator_ids.user_id', 'not in', [user.id]),
                         ('leave_id.pending_approver_ids', 'in', [user.id])
             ]
         </field>
