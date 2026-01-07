@@ -879,7 +879,12 @@ class HrLeave(models.Model):
             to_approve.sudo().write(vals)
 
             if comment:
-                leave.message_post(body=f"Approval comment by {user.name}:<br/>{comment}")
+                # Some deployments restrict mail.message creation for non-admin users.
+                # Keep the audit trail without blocking the approval.
+                leave.sudo().message_post(
+                    body=f"Approval comment by {user.name}:<br/>{comment}",
+                    author_id=getattr(user, "partner_id", False) and user.partner_id.id or False,
+                )
 
             # Check if the whole current step is completed.
             for flow in current_flows:

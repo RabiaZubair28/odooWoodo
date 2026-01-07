@@ -823,7 +823,10 @@ class HrmisLeaveFrontendController(http.Controller):
                     st = leave.validation_status_ids.filtered(lambda s: s.user_id.id == request.env.user.id)[:1]
                     if st:
                         st.sudo().write({"leave_comments": comment})
-                    leave.message_post(body=f"Approval comment by {request.env.user.name}:<br/>{comment}")
+                    leave.sudo().message_post(
+                        body=f"Approval comment by {request.env.user.name}:<br/>{comment}",
+                        author_id=getattr(request.env.user, "partner_id", False) and request.env.user.partner_id.id or False,
+                    )
                 leave.with_user(request.env.user).action_validate()
             else:
                 # Use our custom sequential approval, capturing optional comment.
