@@ -8,7 +8,7 @@
             <!-- Replace approve button -->
             <xpath expr="//button[@name='action_approve']" position="replace">
                 <button
-                    name="action_approve_by_user"
+                    name="action_open_approval_wizard"
                     type="object"
                     string="Approve"
                     class="btn-primary"
@@ -26,6 +26,8 @@
                             <field name="user_id"/>
                             <field name="approved"/>
                             <field name="approved_on"/>
+                            <field name="comment"/>
+                            <field name="commented_on"/>
                         </list>
                     </field>
                 </group>

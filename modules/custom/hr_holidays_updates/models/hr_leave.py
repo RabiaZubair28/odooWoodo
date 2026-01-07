@@ -718,7 +718,7 @@ class HrLeave(models.Model):
     # ----------------------------
     # APPROVE ACTION
     # ----------------------------
-    def action_approve_by_user(self):
+    def action_approve_by_user(self, comment=None):
         """
         Approve using the custom flow engine.
 
@@ -765,8 +765,15 @@ class HrLeave(models.Model):
             if not to_approve:
                 raise UserError("You are not authorized to approve this request at this stage.")
 
+            vals = {"approved": True, "approved_on": now}
+            if comment:
+                vals.update({"comment": comment, "commented_on": now})
+
             # Mark approved (use sudo so validators can be arbitrary users).
-            to_approve.sudo().write({"approved": True, "approved_on": now})
+            to_approve.sudo().write(vals)
+
+            if comment:
+                leave.message_post(body=f"Approval comment by {user.name}:<br/>{comment}")
 
             # Check if the whole current step is completed.
             for flow in current_flows:
@@ -783,6 +790,25 @@ class HrLeave(models.Model):
                     leave.sudo().action_validate()
 
         return True
+
+    def action_open_approval_wizard(self):
+        """
+        Open a small wizard so the approver can optionally add a comment before approving.
+        """
+        self.ensure_one()
+        if self.state != "confirm" or not self.is_pending_for_user(self.env.user):
+            raise UserError("You are not authorized to approve this request at this stage.")
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Approve Leave",
+            "res_model": "hr.leave.approval.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_leave_id": self.id,
+            },
+        }
 
     def action_approve(self):
         """
