@@ -27,7 +27,13 @@
                         ('approver_user_ids', 'not in', [user.id]),
                         '|',
                             ('pending_approver_ids', 'in', [user.id]),
-                            ('approved_approver_ids', 'in', [user.id])
+                            '|',
+                                '&amp;',
+                                    ('approval_status_ids.user_id', '=', user.id),
+                                    ('approval_status_ids.approved', '=', True),
+                                '&amp;',
+                                    ('validation_status_ids.user_id', '=', user.id),
+                                    ('validation_status_ids.validation_status', '=', True)
             ]
         </field>
     </record>
@@ -48,7 +54,9 @@
                         ('leave_id.approver_user_ids', 'not in', [user.id]),
                         '|',
                             ('leave_id.pending_approver_ids', 'in', [user.id]),
-                            ('leave_id.approved_approver_ids', 'in', [user.id])
+                            '&amp;',
+                                ('user_id', '=', user.id),
+                                ('approved', '=', True)
             ]
         </field>
     </record>
