@@ -531,11 +531,22 @@ class HrLeave(models.Model):
         leaves = super().create(vals_list)
         for leave, vals in zip(leaves, vals_list):
             leave._enforce_supporting_documents_required(vals)
+        # Robustness: if a leave is created directly in confirm state (some
+        # portal/API flows do this), ensure status rows exist.
+        confirm_leaves = leaves.filtered(lambda l: l.state == "confirm" and not l.approval_status_ids)
+        if confirm_leaves:
+            confirm_leaves.sudo()._init_approval_flow()
         return leaves
 
     def write(self, vals):
         res = super().write(vals)
         self._enforce_supporting_documents_required(vals)
+        # Robustness: if state is moved to confirm via write (bypassing
+        # action_confirm), ensure status rows exist.
+        if vals.get("state") == "confirm":
+            confirm_leaves = self.filtered(lambda l: l.state == "confirm" and not l.approval_status_ids)
+            if confirm_leaves:
+                confirm_leaves.sudo()._init_approval_flow()
         return res
 
     def _period_bounds(self, ref_date, period):
@@ -630,6 +641,9 @@ class HrLeave(models.Model):
                 [("leave_type_id", "=", leave.holiday_status_id.id)],
                 order="sequence",
             )
+            # Ignore misconfigured flows with no approvers; otherwise we'd skip
+            # auto-generation and end up with no per-leave status rows.
+            flows = flows.filtered(lambda f: f.approver_line_ids or f.approver_ids)
 
             # If no custom flow is configured but the leave type is configured for
             # multi-level approval (from `ohrms_holidays_approval`), auto-generate
