@@ -25,7 +25,9 @@
                     ('create_uid', '=', user.id),
                     '|',
                         ('approver_user_ids', 'not in', [user.id]),
-                        ('pending_approver_ids', 'in', [user.id])
+                        '|',
+                            ('pending_approver_ids', 'in', [user.id]),
+                            ('approved_approver_ids', 'in', [user.id])
             ]
         </field>
     </record>
@@ -44,7 +46,9 @@
                     ('leave_id.create_uid', '=', user.id),
                     '|',
                         ('leave_id.approver_user_ids', 'not in', [user.id]),
-                        ('leave_id.pending_approver_ids', 'in', [user.id])
+                        '|',
+                            ('leave_id.pending_approver_ids', 'in', [user.id]),
+                            ('leave_id.approved_approver_ids', 'in', [user.id])
             ]
         </field>
     </record>

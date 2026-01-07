@@ -100,6 +100,18 @@ class HrLeave(models.Model):
         help="All users who are part of this leave's approval chain (used for visibility rules).",
     )
 
+    approved_approver_ids = fields.Many2many(
+        "res.users",
+        string="Approved Approvers",
+        relation="hr_leave_approved_approver_rel",
+        column1="leave_id",
+        column2="user_id",
+        compute="_compute_approved_approver_ids",
+        store=True,
+        compute_sudo=True,
+        help="Approvers who have already approved this leave (used to keep the record readable after approving).",
+    )
+
     @api.depends(
         "state",
         "holiday_status_id",
@@ -137,6 +149,31 @@ class HrLeave(models.Model):
                 users |= leave.user_ids
 
             leave.approver_user_ids = users
+
+    @api.depends(
+        "approval_status_ids",
+        "approval_status_ids.user_id",
+        "approval_status_ids.approved",
+        "validation_status_ids",
+        "validation_status_ids.user_id",
+        "validation_status_ids.validation_status",
+    )
+    def _compute_approved_approver_ids(self):
+        """
+        Stored list of users who already approved.
+        This allows a user to keep reading the leave after they approve,
+        even though it is no longer pending for them.
+        """
+        Users = self.env["res.users"]
+        for leave in self:
+            users = Users.browse()
+            # Our custom engine statuses.
+            if "approval_status_ids" in leave._fields and getattr(leave, "approval_status_ids", False):
+                users |= leave.approval_status_ids.filtered(lambda s: s.approved).mapped("user_id")
+            # OpenHRMS validation statuses (when present).
+            if "validation_status_ids" in leave._fields and getattr(leave, "validation_status_ids", False):
+                users |= leave.validation_status_ids.filtered(lambda s: getattr(s, "validation_status", False)).mapped("user_id")
+            leave.approved_approver_ids = users
 
     @api.depends(
         "state",
