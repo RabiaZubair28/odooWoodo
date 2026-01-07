@@ -937,6 +937,20 @@ class HrLeave(models.Model):
                     # Final approval: validate the leave (sudo so last validator can complete it).
                     leave.sudo().action_validate()
 
+            # If the record will no longer be readable for this user (because it
+            # moved to the next step), return a safe redirect action so the UI
+            # doesn't try to reload a now-hidden record.
+            if (
+                not leave.env.context.get("skip_post_approve_redirect")
+                and leave.state == "confirm"
+                and hasattr(leave, "is_pending_for_user")
+                and not leave.is_pending_for_user(user)
+            ):
+                try:
+                    return leave._get_approval_requests()
+                except Exception:
+                    return True
+
         return True
 
     def action_open_approval_wizard(self):
