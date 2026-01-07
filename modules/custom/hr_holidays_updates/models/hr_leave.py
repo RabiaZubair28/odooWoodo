@@ -682,6 +682,21 @@ class HrLeave(models.Model):
                         "sequence": idx * 10,
                     })
 
+    def _ensure_custom_approval_initialized(self):
+        """
+        Ensure our custom approval statuses exist for this leave.
+        This is called on-demand from approval entrypoints, because some flows
+        (website/HRMIS routes) may bypass parts of the backend UI and we still
+        want the approval_status_ids list + comments to work.
+        """
+        for leave in self:
+            if leave.state != "confirm" or not leave.holiday_status_id:
+                continue
+            if leave.approval_status_ids:
+                continue
+            # Build status rows with sudo (validators can be any users).
+            leave.sudo()._init_approval_flow()
+
     def _pending_statuses_for_flow(self, flow):
         self.ensure_one()
         return self.approval_status_ids.filtered(lambda s: s.flow_id == flow and not s.approved).sorted(
@@ -733,6 +748,10 @@ class HrLeave(models.Model):
 
             if leave.state == "validate":
                 raise UserError("This leave request is already approved.")
+
+            # Make sure the custom flow/status rows exist so the approval status
+            # table and comment history work reliably.
+            leave._ensure_custom_approval_initialized()
 
             # If no custom flow is configured for this leave type, fall back to
             # the standard Odoo approve behavior.
@@ -796,6 +815,7 @@ class HrLeave(models.Model):
         Open a small wizard so the approver can optionally add a comment before approving.
         """
         self.ensure_one()
+        self._ensure_custom_approval_initialized()
         if self.state != "confirm" or not self.is_pending_for_user(self.env.user):
             raise UserError("You are not authorized to approve this request at this stage.")
 
