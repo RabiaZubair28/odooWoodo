@@ -81,7 +81,11 @@ class HrLeave(models.Model):
         compute="_compute_pending_approver_ids",
         store=True,
         compute_sudo=True,
-        help="Users allowed to approve this leave at the current step (sequential mode only exposes the next approver).",
+        help=(
+            "Users allowed to approve this leave at the current step.\n"
+            "- Sequential: only the next approver can act/see it.\n"
+            "- Parallel: the next consecutive parallel approvers can act/see it together."
+        ),
     )
 
     @api.depends(
@@ -94,6 +98,7 @@ class HrLeave(models.Model):
         "approval_step",
         "approval_status_ids.approved",
         "approval_status_ids.sequence",
+        "approval_status_ids.sequence_type",
         "approval_status_ids.flow_id",
         "approval_status_ids.user_id",
         "validation_status_ids",
@@ -114,13 +119,9 @@ class HrLeave(models.Model):
 
             users = self.env["res.users"].browse()
             for flow in current_flows:
-                pending = leave._pending_statuses_for_flow(flow)
-                if not pending:
-                    continue
-                if flow.mode == "sequential":
-                    users |= pending[0].user_id
-                else:
-                    users |= pending.mapped("user_id")
+                active = leave._active_pending_statuses_for_flow(flow)
+                if active:
+                    users |= active.mapped("user_id")
 
             # Fallback: if no statuses/flows are initialized yet, derive the
             # "next approver" from the ohrms_holidays_approval validator list.
@@ -530,11 +531,22 @@ class HrLeave(models.Model):
         leaves = super().create(vals_list)
         for leave, vals in zip(leaves, vals_list):
             leave._enforce_supporting_documents_required(vals)
+        # Robustness: if a leave is created directly in confirm state (some
+        # portal/API flows do this), ensure status rows exist.
+        confirm_leaves = leaves.filtered(lambda l: l.state == "confirm" and not l.approval_status_ids)
+        if confirm_leaves:
+            confirm_leaves.sudo()._init_approval_flow()
         return leaves
 
     def write(self, vals):
         res = super().write(vals)
         self._enforce_supporting_documents_required(vals)
+        # Robustness: if state is moved to confirm via write (bypassing
+        # action_confirm), ensure status rows exist.
+        if vals.get("state") == "confirm":
+            confirm_leaves = self.filtered(lambda l: l.state == "confirm" and not l.approval_status_ids)
+            if confirm_leaves:
+                confirm_leaves.sudo()._init_approval_flow()
         return res
 
     def _period_bounds(self, ref_date, period):
@@ -629,6 +641,9 @@ class HrLeave(models.Model):
                 [("leave_type_id", "=", leave.holiday_status_id.id)],
                 order="sequence",
             )
+            # Ignore misconfigured flows with no approvers; otherwise we'd skip
+            # auto-generation and end up with no per-leave status rows.
+            flows = flows.filtered(lambda f: f.approver_line_ids or f.approver_ids)
 
             # If no custom flow is configured but the leave type is configured for
             # multi-level approval (from `ohrms_holidays_approval`), auto-generate
@@ -651,6 +666,7 @@ class HrLeave(models.Model):
                                 "flow_id": flow.id,
                                 "sequence": getattr(val, "sequence", 10),
                                 "user_id": val.user_id.id,
+                                "sequence_type": getattr(val, "sequence_type", False) or "sequential",
                             })
                         flows = flow
 
@@ -669,6 +685,7 @@ class HrLeave(models.Model):
                             "flow_id": flow.id,
                             "user_id": line.user_id.id,
                             "sequence": line.sequence,
+                            "sequence_type": line.sequence_type or (flow.mode or "sequential"),
                         })
                     continue
 
@@ -680,6 +697,7 @@ class HrLeave(models.Model):
                         "flow_id": flow.id,
                         "user_id": user.id,
                         "sequence": idx * 10,
+                        "sequence_type": (flow.mode or "sequential"),
                     })
 
     def _ensure_custom_approval_initialized(self):
@@ -703,19 +721,42 @@ class HrLeave(models.Model):
             lambda s: (s.sequence, s.id)
         )
 
-    def _is_user_pending_in_flow(self, flow, user):
+    def _active_pending_statuses_for_flow(self, flow):
         """
-        Return True if this leave is pending for `user` for the given flow, honoring flow.mode.
-        - sequential: only the *next* pending approver can act/see it
-        - parallel: any pending approver can act/see it
+        Return the *currently active* pending approval statuses for a flow.
+
+        The active set is determined from the first not-yet-approved row:
+        - If it is sequential: only that one approver is active.
+        - If it is parallel: that approver and the next *consecutive* parallel approvers
+          are active together (stop at the first sequential row).
         """
         self.ensure_one()
         pending = self._pending_statuses_for_flow(flow)
         if not pending:
-            return False
-        if flow.mode == "sequential":
-            return pending[0].user_id == user
-        return bool(pending.filtered(lambda s: s.user_id == user))
+            return pending
+
+        first = pending[0]
+        first_type = first.sequence_type or (flow.mode or "sequential")
+        if first_type != "parallel":
+            return first
+
+        active = self.env["hr.leave.approval.status"].browse()
+        for st in pending:
+            st_type = st.sequence_type or (flow.mode or "sequential")
+            if st_type != "parallel":
+                break
+            active |= st
+        return active
+
+    def _is_user_pending_in_flow(self, flow, user):
+        """
+        Return True if this leave is pending for `user` for the given flow.
+        - Sequential: only the next pending approver can act/see it
+        - Parallel: next consecutive parallel approvers can act/see it together
+        """
+        self.ensure_one()
+        active = self._active_pending_statuses_for_flow(flow)
+        return bool(active.filtered(lambda s: s.user_id == user))
 
     # ----------------------------
     # CHECK IF USER CAN APPROVE
@@ -738,9 +779,8 @@ class HrLeave(models.Model):
         Approve using the custom flow engine.
 
         Key behavior (your requirement):
-        - If a flow step is *sequential* with multiple approvers, only the next
-          approver can see/approve the leave at that time.
-        - After approval, the leave becomes visible to the next approver.
+        - Sequential: only the next approver can see/approve the leave at that time.
+        - Parallel: the next consecutive parallel approvers can see/approve together.
         """
         now = fields.Datetime.now()
         for leave in self:
@@ -771,15 +811,9 @@ class HrLeave(models.Model):
             # Figure out which status(es) this user is allowed to approve right now.
             to_approve = leave.env["hr.leave.approval.status"].browse()
             for flow in current_flows:
-                pending = leave._pending_statuses_for_flow(flow)
-                if not pending:
-                    continue
-
-                if flow.mode == "sequential":
-                    if pending[0].user_id == user:
-                        to_approve |= pending[0]
-                else:
-                    to_approve |= pending.filtered(lambda s: s.user_id == user)
+                active = leave._active_pending_statuses_for_flow(flow)
+                if active:
+                    to_approve |= active.filtered(lambda s: s.user_id == user)
 
             if not to_approve:
                 raise UserError("You are not authorized to approve this request at this stage.")
