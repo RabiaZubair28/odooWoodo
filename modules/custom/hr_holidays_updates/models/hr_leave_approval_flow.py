@@ -26,7 +26,7 @@ class HrLeaveApprovalFlow(models.Model):
     approver_ids = fields.Many2many(
         "res.users",
         string="Approvers",
-        required=True,
+        required=False,
     )
 
     approver_line_ids = fields.One2many(
