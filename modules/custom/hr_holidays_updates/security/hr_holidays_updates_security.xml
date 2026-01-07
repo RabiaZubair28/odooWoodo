@@ -24,11 +24,7 @@
                     ('employee_id.user_id', '=', user.id),
                     ('create_uid', '=', user.id),
                     '|',
-                        '&amp;','&amp;','&amp;',
-                            ('holiday_status_id.validator_ids.user_id', 'not in', [user.id]),
-                            ('approval_status_ids.user_id', 'not in', [user.id]),
-                            ('validation_status_ids.user_id', 'not in', [user.id]),
-                            ('user_ids', 'not in', [user.id]),
+                        ('approver_user_ids', 'not in', [user.id]),
                         ('pending_approver_ids', 'in', [user.id])
             ]
         </field>
@@ -47,11 +43,7 @@
                     ('leave_id.employee_id.user_id', '=', user.id),
                     ('leave_id.create_uid', '=', user.id),
                     '|',
-                        '&amp;','&amp;','&amp;',
-                            ('leave_id.holiday_status_id.validator_ids.user_id', 'not in', [user.id]),
-                            ('leave_id.approval_status_ids.user_id', 'not in', [user.id]),
-                            ('leave_id.validation_status_ids.user_id', 'not in', [user.id]),
-                            ('leave_id.user_ids', 'not in', [user.id]),
+                        ('leave_id.approver_user_ids', 'not in', [user.id]),
                         ('leave_id.pending_approver_ids', 'in', [user.id])
             ]
         </field>

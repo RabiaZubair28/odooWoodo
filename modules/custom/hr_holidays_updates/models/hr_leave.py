@@ -88,6 +88,53 @@ class HrLeave(models.Model):
         ),
     )
 
+    approver_user_ids = fields.Many2many(
+        "res.users",
+        string="All Approvers",
+        compute="_compute_approver_user_ids",
+        store=True,
+        compute_sudo=True,
+        help="All users who are part of this leave's approval chain (used for visibility rules).",
+    )
+
+    @api.depends(
+        "state",
+        "holiday_status_id",
+        "holiday_status_id.validator_ids",
+        "holiday_status_id.validator_ids.user_id",
+        "approval_status_ids",
+        "approval_status_ids.user_id",
+        "validation_status_ids",
+        "validation_status_ids.user_id",
+        "user_ids",
+    )
+    def _compute_approver_user_ids(self):
+        """
+        Stored union of all approver users for this leave.
+        This avoids complex record-rule domains over x2many relations.
+        """
+        Users = self.env["res.users"]
+        for leave in self:
+            users = Users.browse()
+
+            # Our custom approval engine statuses (preferred).
+            if "approval_status_ids" in leave._fields:
+                users |= leave.approval_status_ids.mapped("user_id")
+
+            # OpenHRMS validation status rows (if present on this DB).
+            if "validation_status_ids" in leave._fields and getattr(leave, "validation_status_ids", False):
+                users |= leave.validation_status_ids.mapped("user_id")
+
+            # Leave type configured validators list.
+            if leave.holiday_status_id and getattr(leave.holiday_status_id, "validator_ids", False):
+                users |= leave.holiday_status_id.validator_ids.mapped("user_id")
+
+            # Some builds keep a direct m2m of validators on the leave.
+            if "user_ids" in leave._fields and getattr(leave, "user_ids", False):
+                users |= leave.user_ids
+
+            leave.approver_user_ids = users
+
     @api.depends(
         "state",
         "holiday_status_id",
@@ -717,8 +764,11 @@ class HrLeave(models.Model):
 
     def _pending_statuses_for_flow(self, flow):
         self.ensure_one()
-        return self.approval_status_ids.filtered(lambda s: s.flow_id == flow and not s.approved).sorted(
-            lambda s: (s.sequence, s.id)
+        # Use sudo to avoid record-rule visibility issues for future approvers.
+        Status = self.env["hr.leave.approval.status"].sudo()
+        return Status.search(
+            [("leave_id", "=", self.id), ("flow_id", "=", flow.id), ("approved", "=", False)],
+            order="sequence, id",
         )
 
     def _active_pending_statuses_for_flow(self, flow):
