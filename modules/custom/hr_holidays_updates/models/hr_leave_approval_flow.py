@@ -65,6 +65,21 @@ class HrLeaveApprovalFlowLine(models.Model):
 
     sequence = fields.Integer(default=10, required=True)
 
+    sequence_type = fields.Selection(
+        [
+            ("sequential", "Sequential"),
+            ("parallel", "Parallel"),
+        ],
+        string="Sequence Type",
+        default=False,
+        required=False,
+        help=(
+            "Controls how this approver is activated relative to the next approvers:\n"
+            "- Sequential: only this approver sees/acts, then the request moves to the next.\n"
+            "- Parallel: this approver and the *next consecutive parallel* approvers are activated together."
+        ),
+    )
+
     user_id = fields.Many2one(
         "res.users",
         required=True,
