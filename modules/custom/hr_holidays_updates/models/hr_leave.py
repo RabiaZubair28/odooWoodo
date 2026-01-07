@@ -716,7 +716,18 @@ class HrLeave(models.Model):
     # INIT FLOW ON SUBMIT
     # ----------------------------
     def action_confirm(self):
-        res = super().action_confirm()
+        # Different Odoo builds name the submit action differently.
+        # Prefer the parent implementation when present; otherwise fall back
+        # to moving the record to 'confirm'.
+        parent = super(HrLeave, self)
+        if hasattr(parent, "action_confirm"):
+            res = parent.action_confirm()
+        elif hasattr(parent, "action_submit"):
+            res = parent.action_submit()
+        else:
+            # Best-effort: align with the common submit state used by hr_holidays.
+            self.write({"state": "confirm"})
+            res = True
         self._init_approval_flow()
         return res
 
