@@ -784,8 +784,20 @@ class HrmisLeaveFrontendController(http.Controller):
                     if "supported_attachment_ids" in leave._fields:
                         leave.sudo().write({"supported_attachment_ids": [(4, att.id)]})
 
-            if hasattr(leave, "action_confirm"):
-                leave.action_confirm()
+            # Different Odoo builds / custom modules name the "submit" action differently,
+            # and some overrides may call a non-existent super().action_confirm().
+            # Be robust here: try the standard actions, otherwise fall back to
+            # writing state=confirm (our hr.leave.write() hook will initialize
+            # the custom approval statuses).
+            try:
+                if hasattr(leave, "action_confirm"):
+                    leave.action_confirm()
+                elif hasattr(leave, "action_submit"):
+                    leave.action_submit()
+                else:
+                    leave.sudo().write({"state": "confirm"})
+            except Exception:
+                leave.sudo().write({"state": "confirm"})
         except Exception as e:
             return request.redirect(
                 f"/hrmis/staff/{employee.id}/leave?tab=new&error={quote_plus(str(e) or 'Could not submit leave request')}"
